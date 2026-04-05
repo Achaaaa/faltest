@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>TETE Gen</title>
+    <script src="https://cdn.jsdelivr.net/npm/@fal-ai/client@1.4.0/dist/browser.min.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #0d0d0d; color: #fff; display: flex; flex-direction: column; align-items: center; padding: 40px; }
+        .container { max-width: 500px; width: 100%; background: #1a1a1a; padding: 30px; border-radius: 20px; border: 1px solid #333; }
+        input, button { width: 100%; padding: 14px; margin-top: 10px; border-radius: 10px; border: 1px solid #333; box-sizing: border-box; background: #222; color: #fff; }
+        button { background: #32CD32; color: #000; font-weight: bold; cursor: pointer; border: none; }
+        button:disabled { background: #444; color: #888; cursor: not-allowed; }
+        #status { margin-top: 15px; text-align: center; color: #32CD32; font-size: 0.9em; min-height: 1.2em; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 style="color: #32CD32; text-align: center;">TETE GENERATOR</h2>
+    <input type="text" id="apiKey" placeholder="fal.ai API Key" autocomplete="off">
+    <input type="file" id="imageInput" accept="image/*">
+    <button id="generateBtn">GENERATE CHIBI</button>
+    <div id="status">Ready.</div>
+    <div id="result" style="margin-top: 20px; text-align: center;"></div>
+</div>
+
+<script>
+    const btn = document.getElementById('generateBtn');
+    const status = document.getElementById('status');
+    const resultDiv = document.getElementById('result');
+    const keyInput = document.getElementById('apiKey');
+
+    // APIキーの保存・復元
+    keyInput.value = localStorage.getItem('fal_api_key') || '';
+    keyInput.addEventListener('input', (e) => localStorage.setItem('fal_api_key', e.target.value));
+
+    btn.addEventListener('click', async () => {
+        const file = document.getElementById('imageInput').files[0];
+        const apiKey = keyInput.value.trim();
+
+        if (!apiKey) return alert("APIキーを入力してください");
+        if (!file) return alert("画像を選択してください");
+
+        // ★ 正しいAPIキーの設定方法
+        fal.config({ credentials: apiKey });
+
+        try {
+            btn.disabled = true;
+            resultDiv.innerHTML = "";
+
+            // ★ アップロード（オプションなしでOK、configで設定済み）
+            status.innerText = "Uploading image...";
+            const imageUrl = await fal.storage.upload(file);
+            console.log("Uploaded:", imageUrl);
+
+            status.innerText = "Generating...";
+
+            const result = await fal.subscribe("fal-ai/flux-2/flash/edit", {
+                input: {
+                    image_urls: [imageUrl],
+                    prompt: "A full-body 3D stylized chibi character figure, based on the uploaded person. Captured in a dynamic K-pop dance pose. Styled messy brown hair, slight smile, rimless sunglasses. Outfit: holographic metallic-sheen mesh t-shirt, iridescent utility vest, silver parachute cargo pants. Background: flat uniform pure lime green (#32CD32).",
+                    num_inference_steps: 12,
+                    image_size: "square"
+                },
+                logs: true,
+                onQueueUpdate: (update) => {
+                    if (update.status === "IN_PROGRESS" && update.logs?.length) {
+                        const last = update.logs[update.logs.length - 1];
+                        if (last?.message) status.innerText = last.message;
+                    }
+                }
+            });
+
+            if (result?.images?.[0]?.url) {
+                resultDiv.innerHTML = `<img src="${result.images[0].url}" style="max-width:100%; border-radius:12px; border: 2px solid #32CD32;">`;
+                status.innerText = "✅ Success!";
+            } else {
+                status.innerText = "画像が返ってきませんでした";
+                console.warn("Result:", result);
+            }
+
+        } catch (error) {
+            console.error("Error:", error);
+            status.innerText = "❌ Error: " + (error?.message || JSON.stringify(error));
+        } finally {
+            btn.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>
