@@ -1,0 +1,14 @@
+{
+  "name": "peraman-generator",
+  "version": "1.0.0",
+  "description": "3D Character Generator using fal.ai",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel deploy --prod"
+  },
+  "dependencies": {
+    "@fal-ai/client": "^1.2.0"
+  }
+}

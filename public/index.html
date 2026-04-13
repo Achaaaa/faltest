@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>PeraModelGenerator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #121212;
+            --bg-sidebar: #010101;
+            --bg-card: #181818;
+            --bg-hover: #282828;
+            --accent: #1DB954;
+            --accent-hover: #1ed760;
+            --text-main: #ffffff;
+            --text-sub: #b3b3b3;
+            --border: rgba(255,255,255,0.1);
+            --success: #1DB954;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; padding: 0; background: var(--bg-base); color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden; display: flex;
+        }
+
+        #canvas-container { 
+            flex: 1; height: 100vh; position: relative; 
+            background: radial-gradient(circle at center, #1e1e1e 0%, #121212 100%); 
+        }
+
+        #ui {
+            width: 380px; height: calc(100vh - 16px); margin: 8px;
+            background: var(--bg-sidebar); border-radius: 12px;
+            display: flex; flex-direction: column; padding: 24px;
+            overflow-y: auto; z-index: 100; box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+            scrollbar-width: thin; scrollbar-color: #555 transparent;
+        }
+
+        h3 { 
+            font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 22px; 
+            margin: 0 0 24px 0; color: var(--text-main); letter-spacing: -0.5px;
+        }
+
+        .input-group { margin-bottom: 24px; }
+        label { 
+            display: block; font-size: 11px; font-weight: 800; color: var(--text-sub); 
+            text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;
+        }
+
+        input[type="password"], textarea {
+            width: 100%; background: var(--bg-card); border: 1px solid transparent;
+            color: #fff; padding: 14px; border-radius: 4px; font-size: 13px;
+            transition: all 0.25s;
+        }
+        input[type="password"]:focus, textarea:focus { 
+            background: var(--bg-hover); border-color: #535353; outline: none; 
+        }
+
+        .file-input-area {
+            width: 100%; height: 140px; background: var(--bg-card);
+            border-radius: 12px; border: 1px dashed var(--border);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; position: relative; overflow: hidden; transition: 0.3s cubic-bezier(0.3, 0, 0, 1);
+        }
+        .file-input-area:hover { 
+            background: var(--bg-hover); border-color: var(--text-sub); 
+            transform: scale(1.02);
+        }
+        .file-input-label { font-size: 13px; font-weight: 600; color: var(--text-sub); }
+        .file-input-area img { position: absolute; max-width: 95%; max-height: 95%; border-radius: 8px; object-fit: contain; }
+
+        #status-tracker { margin-bottom: 24px; background: var(--bg-card); border-radius: 10px; padding: 12px; }
+        .status-item {
+            display: flex; align-items: center; padding: 12px; border-radius: 6px;
+            font-size: 13px; color: var(--text-sub); gap: 14px; transition: 0.2s;
+        }
+        .status-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .status-item.active { color: var(--accent); font-weight: 600; }
+        .status-item.done { color: #fff; }
+        .status-icon { font-size: 16px; width: 24px; text-align: center; }
+
+        button {
+            width: 100%; padding: 16px; border: none; border-radius: 500px;
+            font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 900;
+            cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1.2px;
+        }
+        #genBtn { background: var(--accent); color: #000; margin: 12px 0; }
+        #genBtn:hover { background: var(--accent-hover); transform: scale(1.04); }
+        #genBtn:active { transform: scale(0.98); }
+        #genBtn:disabled { background: #535353; cursor: not-allowed; transform: none; color: #b3b3b3; }
+
+        #applyCurrentBtn { 
+            background: transparent; color: var(--text-main); border: 1px solid #727272; 
+        }
+        #applyCurrentBtn:hover { border-color: #fff; transform: scale(1.04); }
+
+        .preview-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 32px;
+            border-top: 1px solid var(--border); padding-top: 24px;
+        }
+        .preview-box {
+            position: relative; aspect-ratio: 1; background: var(--bg-card); 
+            border-radius: 12px; overflow: hidden; padding: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4); transition: 0.3s;
+        }
+        .preview-box:hover { background: var(--bg-hover); transform: translateY(-4px); }
+        .preview-box img { width: 100%; height: calc(100% - 24px); object-fit: cover; border-radius: 8px; background: #222; }
+        .p-label { 
+            font-size: 10px; font-weight: 800; color: var(--text-sub); 
+            text-align: center; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.6px;
+        }
+
+        .preview-controls {
+            position: absolute; top: 8px; right: 8px; z-index: 10;
+            background: rgba(0,0,0,0.8); border-radius: 20px; 
+            backdrop-filter: blur(12px); border: 1px solid var(--border);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 32px; height: 32px; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .preview-controls.is-open {
+            width: 80px; height: auto; border-radius: 12px; padding: 8px 4px;
+        }
+
+        .settings-toggle {
+            width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--text-sub); font-size: 14px; transition: 0.3s;
+            flex-shrink: 0; position: relative;
+        }
+        .settings-toggle:hover { color: #fff; transform: rotate(45deg); }
+        .preview-controls.is-open .settings-toggle { transform: rotate(90deg); color: var(--accent); }
+
+        /* Mode Indicator Dot */
+        .mode-dot {
+            position: absolute; top: 6px; right: 6px; width: 6px; height: 6px;
+            border-radius: 50%; background: #535353; border: 1px solid #000;
+        }
+        .mode-dot.is-manual { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+
+        .controls-content {
+            opacity: 0; display: flex; flex-direction: column; gap: 10px; 
+            transition: 0.3s; pointer-events: none; width: 100%; align-items: center;
+        }
+        .preview-controls.is-open .controls-content { opacity: 1; pointer-events: auto; }
+
+        .manual-btn {
+            background: #fff; border: none; color: #000;
+            font-size: 8px; padding: 4px 8px; border-radius: 20px; cursor: pointer;
+            font-weight: 900; text-transform: uppercase; letter-spacing: 0.3px; width: 90%;
+        }
+        .manual-btn:hover { background: var(--accent); }
+
+        .switch {
+            position: relative; display: inline-block; width: 32px; height: 18px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #535353; transition: .4s; border-radius: 18px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px;
+            background-color: white; transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(14px); }
+        .mode-text { font-size: 8px; font-weight: 900; color: var(--text-sub); text-align: center; margin-bottom: 3px; text-transform: uppercase; }
+
+        .camera-btn {
+            position: absolute; bottom: 12px; right: 12px;
+            background: rgba(255,255,255,0.1); border: 1px solid var(--border); color: white;
+            padding: 8px 16px; border-radius: 500px; cursor: pointer; font-size: 10px; font-weight: 800; z-index: 10;
+            transition: 0.2s; backdrop-filter: blur(6px);
+        }
+        .camera-btn:hover { background: #fff; color: #000; }
+        
+        .close-btn { 
+            background: #fff; color: #000; width: 32px; height: 32px; 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px;
+        }
+
+        /* Camera Modal */
+        #cameraContainer {
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 600px; height: 600px; max-width: 95vw; max-height: 95vh;
+            background: #000; border-radius: 20px; z-index: 1000;
+            box-shadow: 0 0 0 10000px rgba(0,0,0,0.7), 0 20px 60px rgba(0,0,0,0.8);
+            border: 1px solid var(--border); overflow: hidden;
+        }
+        #cameraVideo { width: 100%; height: 100%; object-fit: cover; }
+        .camera-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: flex-end;
+            padding: 30px; background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 40%);
+        }
+
+        #ui::-webkit-scrollbar { width: 8px; }
+        #ui::-webkit-scrollbar-thumb { background: #4f4f4f; border-radius: 8px; }
+        #ui::-webkit-scrollbar-thumb:hover { background: #777; }
+    </style>
+</head>
+
+<body>
+
+    <div id="canvas-container"></div>
+
+    <div id="ui">
+        <h3>PeraModelGenerator</h3>
+
+        <div id="status-tracker">
+            <div class="status-item" id="st-1"><span class="status-icon">⚪</span> Stage 1: Style Conversion</div>
+            <div class="status-item" id="st-2"><span class="status-icon">⚪</span> Stage 2: Dual-Guide Posing</div>
+            <div class="status-item" id="st-3"><span class="status-icon">⚪</span> Stage 3: Texture Refinement</div>
+            <div class="status-item" id="st-4"><span class="status-icon">⚪</span> Stage 4: 3D Mapping</div>
+        </div>
+
+
+        <div class="input-group">
+            <label>1. Person Photo</label>
+            <div class="file-input-area" id="photoDropArea">
+                <span class="file-input-label" id="photoLabel">Upload Person</span>
+                <img id="photoPreview">
+                <button class="camera-btn" id="startCamBtn">📷 CAMERA</button>
+                <input type="file" id="photoInput" accept="image/*" style="display:none;">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>1. Styled Prompt</label>
+            <textarea id="p2" rows="2">１枚目の人物を２枚目のスタイルに変換、デフォルメして。
+
+目的と目標:
+
+* ユーザーから提供された写真の人物を、3Dフィギュアのようなテイストにした後、それをアメコミのスタイルに変換した全身画像を生成します。
+
+* ユーザー写真の髪型、顔だち、着ているもの、アクセサリーなどの身体的特徴を忠実に引き継ぎます。
+
+
+
+行動とルール:
+
+
+
+1) 入力内容の分析:
+
+ユーザーがアップロードした人物写真から、顔の特徴、服装を詳細に把握します。
+
+
+
+2) 画像生成のプロセス:
+
+ a) 写真の人物の顔と体をデフォルメします。
+
+-大きくデフォルメされた瞳。左目の瞳の中に白抜きで 'J' の文字、右目の瞳の中に 'B' の文字がはっきりと描かれている。無表情でクールな顔立ち。
+
+-口は小さく、首が細く、肩幅は極端に狭く。足はかなり大きくデフォルメする。
+
+-極端にデフォルメされた5等身（大きな頭、小さな体、非常に大きな足）。ちびキャラ（Chibi）スタイル。
+
+
+
+
+
+b)以下のテイストで表示します
+
+-レトロでヴィンテージなアメリカン・コミックスの印刷スタイル。画像は古くて不完全なオフセット印刷機で印刷されたように見え、すべての色や影の部分は、目に見える網点（ベンデイドット）パターンによって構成されている。
+
+-人物のポーズは、躍動感のあるダンシングスタイルで広角レンズを意識させるダイナミックな構図で描きます。
+
+-背景はキャラクターを引き立てるビビッドな単色（黄色、赤、青、ピンク、水色、緑など）に設定
+
+-余計なオブジェクトを排除。
+
+-コマ割りはせず、単色背景にキャラクターのみ配置された状態にします。
+
+
+
+全体のトーン:
+
+* エネルギッシュで、コミカル。
+
+* ユーザーの写真をヒーローのように変身させるワクワク感を演出し、クリエイティブな提案を積極的に行います。</textarea>
+        </div>
+
+        <div class="input-group">
+            <label>2. Pattern Prompt</label>
+            <textarea id="p3" rows="3">１枚目の画像を２枚目の四肢の長さ、頭身、手足の大きさ、レイアウトにして。</textarea>
+        </div>
+
+        <div class="input-group">
+            <label>2. Pattern Guide</label>
+            <div class="file-input-area" id="uvDropArea">
+                <span class="file-input-label" id="uvLabel">Upload Pattern Guide</span>
+                <img id="uvPatternPreview">
+            </div>
+            <input type="file" id="uvInput" accept="image/*" style="display:none;">
+        </div>
+
+        <button id="genBtn">START PIPELINE</button>
+        <button id="applyCurrentBtn"
+            style="background:#1e293b; border: 1px solid var(--accent); margin-top: -10px; font-size: 11px; padding: 12px;">APPLY
+            CURRENT (SKIP AI)</button>
+
+        <div class="preview-grid">
+            <!-- Box 1 -->
+            <div class="preview-box">
+                <div class="preview-controls" id="controls1">
+                    <div class="settings-toggle" onclick="toggleSettings(1)">
+                        ⚙️<div class="mode-dot" id="modeDot1"></div>
+                    </div>
+                    <div class="controls-content">
+                        <div class="mode-text" id="modeText1">AUTO</div>
+                        <label class="switch"><input type="checkbox" id="toggle1"><span class="slider"></span></label>
+                        <button class="manual-btn" onclick="document.getElementById('manualIn1').click()">Manual</button>
+                    </div>
+                </div>
+                <img id="img1">
+                <input type="file" id="manualIn1" accept="image/*" style="display:none;">
+                <div class="p-label">1. Styled</div>
+            </div>
+
+            <!-- Box 2 -->
+            <div class="preview-box">
+                <div class="preview-controls" id="controls2">
+                    <div class="settings-toggle" onclick="toggleSettings(2)">
+                        ⚙️<div class="mode-dot" id="modeDot2"></div>
+                    </div>
+                    <div class="controls-content">
+                        <div class="mode-text" id="modeText2">AUTO</div>
+                        <label class="switch"><input type="checkbox" id="toggle2"><span class="slider"></span></label>
+                        <button class="manual-btn" onclick="document.getElementById('manualIn2').click()">Manual</button>
+                    </div>
+                </div>
+                <img id="img2">
+                <input type="file" id="manualIn2" accept="image/*" style="display:none;">
+                <div class="p-label">2. Color Pattern</div>
+            </div>
+
+            <!-- Box 3 -->
+            <div class="preview-box">
+                <div class="preview-controls" id="controls3">
+                    <div class="settings-toggle" onclick="toggleSettings(3)">
+                        ⚙️<div class="mode-dot" id="modeDot3"></div>
+                    </div>
+                    <div class="controls-content">
+                        <div class="mode-text" id="modeText3">AUTO</div>
+                        <label class="switch"><input type="checkbox" id="toggle3"><span class="slider"></span></label>
+                        <button class="manual-btn" onclick="document.getElementById('manualIn3').click()">Manual</button>
+                    </div>
+                </div>
+                <img id="img3">
+                <input type="file" id="manualIn3" accept="image/*" style="display:none;">
+                <div class="p-label">3. B&W Mask</div>
+            </div>
+
+            <div class="preview-box"><img id="img4">
+                <div class="p-label">4. Model Result</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Camera Modal -->
+    <div id="cameraContainer">
+        <video id="cameraVideo" autoplay playsinline></video>
+        <div class="camera-overlay">
+            <div class="camera-ui">
+                <button class="snap-btn" id="snapBtn">CAPTURE PHOTO</button>
+                <button class="close-btn" id="stopCamBtn">✕</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="importmap">
+{
+    "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+}
+</script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        let scene, camera, renderer, model, mixer, clock;
+        let basePhotoB64 = null, uvPatternB64 = null;
+
+        // --- Central State Management ---
+        const textureState = {
+            1: { auto: null, manual: null, isManual: false },
+            2: { auto: null, manual: null, isManual: false },
+            3: { auto: null, manual: null, isManual: false }
+        };
+
+
+        // Helper to update the visible image and labels in a preview box
+        function updatePreview(id) {
+            const state = textureState[id];
+            const img = document.getElementById(`img${id}`);
+            const modeText = document.getElementById(`modeText${id}`);
+            const modeDot = document.getElementById(`modeDot${id}`);
+            const toggle = document.getElementById(`toggle${id}`);
+            
+            toggle.checked = state.isManual;
+            const activeUrl = state.isManual ? state.manual : state.auto;
+            if (activeUrl) img.src = activeUrl;
+            
+            modeText.innerText = state.isManual ? "MANUAL" : "AUTO";
+            modeText.style.color = state.isManual ? "var(--success)" : "#94a3b8";
+            
+            if (state.isManual) modeDot.classList.add('is-manual');
+            else modeDot.classList.remove('is-manual');
+        }
+
+        window.toggleSettings = (id) => {
+            const el = document.getElementById(`controls${id}`);
+            el.classList.toggle('is-open');
+        };
+
+        // Initialize Multi-step UI Controls
+        [1, 2, 3].forEach(id => {
+            const toggle = document.getElementById(`toggle${id}`);
+            const manualIn = document.getElementById(`manualIn${id}`);
+
+            toggle.onchange = () => {
+                textureState[id].isManual = toggle.checked;
+                updatePreview(id);
+                if (id >= 2) applyToModel(); // Instantly update 3D preview for Stage 2/3 changes
+            };
+
+            manualIn.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    textureState[id].manual = ev.target.result;
+                    textureState[id].isManual = true;
+                    updatePreview(id);
+                    if (id >= 2) applyToModel();
+                };
+                reader.readAsDataURL(file);
+            };
+        });
+
+        // --- Status Tracker ---
+        function updateStatus(step, state) {
+            const item = document.getElementById(`st-${step}`);
+            const icon = item.querySelector('.status-icon');
+            if (!item || !icon) return;
+            item.classList.remove('active', 'done');
+            if (state === 'loading') { item.classList.add('active'); icon.innerText = '⏳'; }
+            else if (state === 'done') { item.classList.add('done'); icon.innerText = '✅'; }
+            else { icon.innerText = '⚪'; }
+        }
+
+        // --- Main Input File Loaders (Stage 1&2 Source) ---
+        const setupFile = (clickId, inputId, previewId, labelId, setter) => {
+            const area = document.getElementById(clickId);
+            const input = document.getElementById(inputId);
+            if (!area || !input) return;
+
+            area.onclick = () => input.click();
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    setter(ev.target.result);
+                    document.getElementById(previewId).src = ev.target.result;
+                    document.getElementById(labelId).style.visibility = 'hidden';
+                };
+                reader.readAsDataURL(file);
+            };
+        };
+        setupFile('photoDropArea', 'photoInput', 'photoPreview', 'photoLabel', (v) => basePhotoB64 = v);
+        setupFile('uvDropArea', 'uvInput', 'uvPatternPreview', 'uvLabel', (v) => uvPatternB64 = v);
+
+        // --- Load Default Pattern Guide ---
+        async function loadDefaultPattern() {
+            try {
+                const response = await fetch('PatternGuide.png');
+                if (!response.ok) throw new Error('Default pattern not found');
+                const blob = await response.blob();
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    uvPatternB64 = e.target.result;
+                    document.getElementById('uvPatternPreview').src = uvPatternB64;
+                    document.getElementById('uvLabel').style.visibility = 'hidden';
+                };
+                reader.readAsDataURL(blob);
+            } catch (err) {
+                console.warn("Could not load default PatternGuide.png. Manual upload required. Details:", err.message);
+            }
+        }
+        loadDefaultPattern();
+
+        // --- Camera Logic ---
+        let cameraStream = null;
+        const camContainer = document.getElementById('cameraContainer');
+        const camVideo = document.getElementById('cameraVideo');
+
+        document.getElementById('startCamBtn').onclick = async (e) => {
+            e.stopPropagation();
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                camVideo.srcObject = cameraStream;
+                camContainer.style.display = 'block';
+            } catch (err) {
+                alert("Camera access denied or not available. Details: " + err.message);
+            }
+        };
+
+        const stopCamera = () => {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+            camContainer.style.display = 'none';
+        };
+
+        document.getElementById('stopCamBtn').onclick = (e) => { e.stopPropagation(); stopCamera(); };
+
+        document.getElementById('snapBtn').onclick = (e) => {
+            e.stopPropagation();
+            if (!camVideo.videoWidth) return;
+            const canvas = document.createElement('canvas');
+            canvas.width = camVideo.videoWidth;
+            canvas.height = camVideo.videoHeight;
+            canvas.getContext('2d').drawImage(camVideo, 0, 0);
+
+            const dataUrl = canvas.toDataURL('image/png');
+            basePhotoB64 = dataUrl;
+            document.getElementById('photoPreview').src = dataUrl;
+            document.getElementById('photoLabel').style.visibility = 'hidden';
+            stopCamera();
+        };
+
+        init();
+        animate();
+
+        // --- fal.ai Proxy Fetcher ---
+        async function falFetch(isEdit, payload) {
+            const res = await fetch('/api/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ isEdit, payload })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error || "Unknown Error");
+            }
+            if (!data.images || data.images.length === 0) throw new Error("No images generated.");
+            return data.images[0].url;
+        }
+
+        async function run() {
+            if (!basePhotoB64 || !uvPatternB64) return alert("Please upload both photos!");
+            const btn = document.getElementById('genBtn');
+            btn.disabled = true;
+            [1, 2, 3, 4].forEach(i => updateStatus(i, 'idle'));
+
+            try {
+                // Stage 1: Style
+                let res1 = (textureState[1].isManual && textureState[1].manual) ? textureState[1].manual : null;
+                if (!res1) {
+                    updateStatus(1, 'loading');
+                    res1 = await falFetch(true, {
+                        prompt: document.getElementById('p2').value,
+                        image_urls: [basePhotoB64]
+                    });
+                    textureState[1].auto = res1;
+                    updatePreview(1);
+                    updateStatus(1, 'done');
+                } else {
+                    updateStatus(1, 'done');
+                }
+
+                // Stage 2: Dual-Guide T-Pose Pattern Matching
+                let res2 = (textureState[2].isManual && textureState[2].manual) ? textureState[2].manual : null;
+                if (!res2) {
+                    updateStatus(2, 'loading');
+                    res2 = await falFetch(true, {
+                        prompt: document.getElementById('p3').value,
+                        image_urls: [res1, uvPatternB64],
+                    });
+                    textureState[2].auto = res2;
+                    updatePreview(2);
+                    updateStatus(2, 'done');
+                } else {
+                    updateStatus(2, 'done');
+                }
+
+                // Stage 3: Generate Alpha Mask
+                let res3 = (textureState[3].isManual && textureState[3].manual) ? textureState[3].manual : null;
+                if (!res3) {
+                    updateStatus(3, 'loading');
+                    res3 = await falFetch(true, {
+                        prompt: "Professional 2D game mask texture, high contrast black and white, white silhouette of the character from Image 1, pure black background, no gray areas, sharp edges",
+                        image_urls: [res2]
+                    });
+                    textureState[3].auto = res3;
+                    updatePreview(3);
+                    updateStatus(3, 'done');
+                } else {
+                    updateStatus(3, 'done');
+                }
+
+                // Stage 4: Apply to Model
+                await applyToModel();
+
+            } catch (e) {
+                alert("Error: " + e.message);
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function applyToModel() {
+            updateStatus(4, 'loading');
+            const colorSrc = textureState[2].isManual ? textureState[2].manual : textureState[2].auto;
+            const maskSrc = textureState[3].isManual ? textureState[3].manual : textureState[3].auto;
+
+            if (!colorSrc || !maskSrc) {
+                updateStatus(4, 'idle');
+                return;
+            }
+
+            const loader = new THREE.TextureLoader();
+            const loadTex = (url) => new Promise(resolve => loader.load(url, resolve));
+
+            try {
+                const [texColor, texMask] = await Promise.all([
+                    loadTex(colorSrc),
+                    loadTex(maskSrc)
+                ]);
+
+                texColor.colorSpace = THREE.SRGBColorSpace;
+                texColor.flipY = true;
+                texMask.flipY = true;
+
+                if (model) {
+                    model.traverse(c => {
+                        if (c.isMesh) {
+                            c.material.map = texColor;
+                            c.material.alphaMap = texMask;
+                            c.material.transparent = true;
+                            c.material.alphaTest = 0.5;
+                            c.material.side = THREE.DoubleSide;
+                            c.material.needsUpdate = true;
+                        }
+                    });
+                }
+                updateStatus(4, 'done');
+            } catch (err) {
+                console.error("Texture loading failed", err);
+                updateStatus(4, 'idle');
+            }
+        }
+
+
+        function init() {
+            const container = document.getElementById('canvas-container');
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / window.innerHeight, 1, 2000);
+            camera.position.set(0, 120, 300);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+            clock = new THREE.Clock();
+            scene.add(new THREE.AmbientLight(0xffffff, 1.5));
+            new FBXLoader().load('peraman.fbx', (obj) => {
+                model = obj;
+                scene.add(obj);
+                obj.traverse(c => {
+                    if (c.isMesh) {
+                        c.material.side = THREE.DoubleSide;
+                        c.material.transparent = true;
+                        c.material.alphaTest = 0.5;
+                    }
+                });
+                mixer = new THREE.AnimationMixer(obj);
+                if (obj.animations && obj.animations.length > 0) mixer.clipAction(obj.animations[0]).play();
+            });
+            new OrbitControls(camera, renderer.domElement).target.set(0, 100, 0);
+            document.getElementById('genBtn').onclick = run;
+            document.getElementById('applyCurrentBtn').onclick = applyToModel;
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, window.innerHeight);
+            });
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (mixer) mixer.update(clock.getDelta());
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+
+</html>
