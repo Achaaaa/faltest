@@ -23,13 +23,17 @@ export default async function handler(req, res) {
   // Allow GET for easy browser-based diagnostics
   if (req.method === 'GET') {
     const envKeys = Object.keys(process.env).filter(k => !k.startsWith('VERCEL_')).sort();
-    return res.status(200).json({
-      status: 'diagnostic',
-      fal_key_present: !!process.env.FAL_KEY,
-      env_keys_found: envKeys,
-      node_env: process.env.NODE_ENV,
-      message: 'This is a diagnostic response. For generation, please use POST.'
-    });
+    return res.status(200)
+      .setHeader('Cache-Control', 'no-store, max-age=0')
+      .json({
+        status: 'diagnostic',
+        now: new Date().toISOString(),
+        fal_key_present: !!process.env.FAL_KEY,
+        fal_key_length: process.env.FAL_KEY ? process.env.FAL_KEY.length : 0,
+        env_keys_found: envKeys,
+        node_env: process.env.NODE_ENV,
+        message: 'This is a diagnostic response. For generation, please use POST.'
+      });
   }
 
   if (req.method !== 'POST') {
