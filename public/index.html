@@ -658,7 +658,7 @@
                 // Stage 3: Alpha Mask
                 updateStatus(3, 'loading');
                 const res3 = await falFetch(true, {
-                    prompt: "Professional 2D game mask texture, high contrast black and white silhouette",
+                    prompt: "Professional 2D game mask texture, semantic segmentation mask of a person based on the boundary, high contrast two-color (black and white) composition, the figure is solid white with no black inside, the background is solid black, precise silhouette separation.",
                     image_urls: [res2]
                 });
                 textureState[3].auto = res3;
