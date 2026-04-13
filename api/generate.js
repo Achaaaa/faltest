@@ -20,6 +20,18 @@ export default async function handler(req, res) {
   const bodySize = req.body ? JSON.stringify(req.body).length : 0;
   console.log(`[API] Method: ${req.method}, Path: /api/generate, Body Size: ${(bodySize / 1024).toFixed(2)} KB`);
 
+  // Allow GET for easy browser-based diagnostics
+  if (req.method === 'GET') {
+    const envKeys = Object.keys(process.env).filter(k => !k.startsWith('VERCEL_')).sort();
+    return res.status(200).json({
+      status: 'diagnostic',
+      fal_key_present: !!process.env.FAL_KEY,
+      env_keys_found: envKeys,
+      node_env: process.env.NODE_ENV,
+      message: 'This is a diagnostic response. For generation, please use POST.'
+    });
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed. Please use POST.' });
   }
@@ -65,7 +77,8 @@ export default async function handler(req, res) {
     const message = error.message || "An error occurred while calling the fal.ai API";
     return res.status(status).json({
       error: message,
-      details: error.data || null
+      details: error.data || null,
+      debug_info: error.data || null
     });
   }
 }
