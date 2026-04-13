@@ -702,6 +702,7 @@ b)以下のテイストで表示します
         import * as THREE from 'three';
         import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { fal } from 'fal';
 
         let scene, camera, renderer, model, mixer, clock;
         let basePhotoB64 = null, uvPatternB64 = null;
@@ -862,7 +863,20 @@ b)以下のテイストで表示します
         // --- fal.ai Proxy Fetcher ---
         async function falFetch(isEdit, payload) {
             try {
-                // Check payload size (approximate)
+                // If a manual key is provided, use the fal core SDK directly (more secure & avoids proxy limits)
+                const manualKey = document.getElementById('falKeyInput').value.trim();
+                if (manualKey) {
+                    console.log("[Client] Using direct fal.ai connection with manual key.");
+                    fal.config({ credentials: manualKey, proxyUrl: null });
+                    const endpoint = isEdit ? "fal-ai/nano-banana-2/edit" : "fal-ai/nano-banana-2";
+                    const result = await fal.run(endpoint, {
+                        input: payload
+                    });
+                    if (!result.images || result.images.length === 0) throw new Error("No images generated.");
+                    return result.images[0].url;
+                }
+
+                // Fallback to Serverless Proxy
                 const payloadSize = JSON.stringify(payload).length;
                 if (payloadSize > 4 * 1024 * 1024) { // 4MB threshold for Vercel 4.5MB limit
                     console.warn(`Payload size (${(payloadSize / 1024 / 1024).toFixed(2)}MB) is near/above Vercel limit.`);
