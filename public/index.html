@@ -3,10 +3,12 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>PeraModelGenerator</title>
+    <title>PeraModelGeneratorrrrr</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Montserrat:wght@700;900&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --bg-base: #121212;
@@ -17,191 +19,491 @@
             --accent-hover: #1ed760;
             --text-main: #ffffff;
             --text-sub: #b3b3b3;
-            --border: rgba(255,255,255,0.1);
+            --border: rgba(255, 255, 255, 0.1);
             --success: #1DB954;
         }
 
-        * { box-sizing: border-box; }
-        body {
-            margin: 0; padding: 0; background: var(--bg-base); color: var(--text-main);
-            font-family: 'Inter', sans-serif;
-            overflow: hidden; display: flex;
+        * {
+            box-sizing: border-box;
         }
 
-        #canvas-container { 
-            flex: 1; height: 100vh; position: relative; 
-            background: radial-gradient(circle at center, #1e1e1e 0%, #121212 100%); 
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg-base);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            display: flex;
+        }
+
+        #canvas-container {
+            flex: 1;
+            height: 100vh;
+            position: relative;
+            background: radial-gradient(circle at center, #1e1e1e 0%, #121212 100%);
         }
 
         #ui {
-            width: 380px; height: calc(100vh - 16px); margin: 8px;
-            background: var(--bg-sidebar); border-radius: 12px;
-            display: flex; flex-direction: column; padding: 24px;
-            overflow-y: auto; z-index: 100; box-shadow: 0 4px 24px rgba(0,0,0,0.5);
-            scrollbar-width: thin; scrollbar-color: #555 transparent;
+            width: 380px;
+            height: calc(100vh - 16px);
+            margin: 8px;
+            background: var(--bg-sidebar);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            overflow-y: auto;
+            z-index: 100;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+            scrollbar-width: thin;
+            scrollbar-color: #555 transparent;
         }
 
-        h3 { 
-            font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 22px; 
-            margin: 0 0 24px 0; color: var(--text-main); letter-spacing: -0.5px;
+        h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900;
+            font-size: 22px;
+            margin: 0 0 24px 0;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
         }
 
-        .input-group { margin-bottom: 24px; }
-        label { 
-            display: block; font-size: 11px; font-weight: 800; color: var(--text-sub); 
-            text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;
+        .input-group {
+            margin-bottom: 24px;
         }
 
-        input[type="password"], textarea {
-            width: 100%; background: var(--bg-card); border: 1px solid transparent;
-            color: #fff; padding: 14px; border-radius: 4px; font-size: 13px;
+        label {
+            display: block;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="password"],
+        textarea {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid transparent;
+            color: #fff;
+            padding: 14px;
+            border-radius: 4px;
+            font-size: 13px;
             transition: all 0.25s;
         }
-        input[type="password"]:focus, textarea:focus { 
-            background: var(--bg-hover); border-color: #535353; outline: none; 
+
+        input[type="password"]:focus,
+        textarea:focus {
+            background: var(--bg-hover);
+            border-color: #535353;
+            outline: none;
         }
 
         .file-input-area {
-            width: 100%; height: 140px; background: var(--bg-card);
-            border-radius: 12px; border: 1px dashed var(--border);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer; position: relative; overflow: hidden; transition: 0.3s cubic-bezier(0.3, 0, 0, 1);
+            width: 100%;
+            height: 140px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px dashed var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s cubic-bezier(0.3, 0, 0, 1);
         }
-        .file-input-area:hover { 
-            background: var(--bg-hover); border-color: var(--text-sub); 
+
+        .file-input-area:hover {
+            background: var(--bg-hover);
+            border-color: var(--text-sub);
             transform: scale(1.02);
         }
-        .file-input-label { font-size: 13px; font-weight: 600; color: var(--text-sub); }
-        .file-input-area img { position: absolute; max-width: 95%; max-height: 95%; border-radius: 8px; object-fit: contain; }
 
-        #status-tracker { margin-bottom: 24px; background: var(--bg-card); border-radius: 10px; padding: 12px; }
-        .status-item {
-            display: flex; align-items: center; padding: 12px; border-radius: 6px;
-            font-size: 13px; color: var(--text-sub); gap: 14px; transition: 0.2s;
+        .file-input-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-sub);
         }
-        .status-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
-        .status-item.active { color: var(--accent); font-weight: 600; }
-        .status-item.done { color: #fff; }
-        .status-icon { font-size: 16px; width: 24px; text-align: center; }
+
+        .file-input-area img {
+            position: absolute;
+            max-width: 95%;
+            max-height: 95%;
+            border-radius: 8px;
+            object-fit: contain;
+        }
+
+        #status-tracker {
+            margin-bottom: 24px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            padding: 12px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--text-sub);
+            gap: 14px;
+            transition: 0.2s;
+        }
+
+        .status-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        .status-item.active {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .status-item.done {
+            color: #fff;
+        }
+
+        .status-icon {
+            font-size: 16px;
+            width: 24px;
+            text-align: center;
+        }
 
         button {
-            width: 100%; padding: 16px; border: none; border-radius: 500px;
-            font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 900;
-            cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1.2px;
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 500px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
         }
-        #genBtn { background: var(--accent); color: #000; margin: 12px 0; }
-        #genBtn:hover { background: var(--accent-hover); transform: scale(1.04); }
-        #genBtn:active { transform: scale(0.98); }
-        #genBtn:disabled { background: #535353; cursor: not-allowed; transform: none; color: #b3b3b3; }
 
-        #applyCurrentBtn { 
-            background: transparent; color: var(--text-main); border: 1px solid #727272; 
+        #genBtn {
+            background: var(--accent);
+            color: #000;
+            margin: 12px 0;
         }
-        #applyCurrentBtn:hover { border-color: #fff; transform: scale(1.04); }
+
+        #genBtn:hover {
+            background: var(--accent-hover);
+            transform: scale(1.04);
+        }
+
+        #genBtn:active {
+            transform: scale(0.98);
+        }
+
+        #genBtn:disabled {
+            background: #535353;
+            cursor: not-allowed;
+            transform: none;
+            color: #b3b3b3;
+        }
+
+        #applyCurrentBtn {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid #727272;
+        }
+
+        #applyCurrentBtn:hover {
+            border-color: #fff;
+            transform: scale(1.04);
+        }
 
         .preview-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 32px;
-            border-top: 1px solid var(--border); padding-top: 24px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 32px;
+            border-top: 1px solid var(--border);
+            padding-top: 24px;
         }
+
         .preview-box {
-            position: relative; aspect-ratio: 1; background: var(--bg-card); 
-            border-radius: 12px; overflow: hidden; padding: 10px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4); transition: 0.3s;
+            position: relative;
+            aspect-ratio: 1;
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            padding: 10px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            transition: 0.3s;
         }
-        .preview-box:hover { background: var(--bg-hover); transform: translateY(-4px); }
-        .preview-box img { width: 100%; height: calc(100% - 24px); object-fit: cover; border-radius: 8px; background: #222; }
-        .p-label { 
-            font-size: 10px; font-weight: 800; color: var(--text-sub); 
-            text-align: center; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.6px;
+
+        .preview-box:hover {
+            background: var(--bg-hover);
+            transform: translateY(-4px);
+        }
+
+        .preview-box img {
+            width: 100%;
+            height: calc(100% - 24px);
+            object-fit: cover;
+            border-radius: 8px;
+            background: #222;
+        }
+
+        .p-label {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--text-sub);
+            text-align: center;
+            margin-top: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
         }
 
         .preview-controls {
-            position: absolute; top: 8px; right: 8px; z-index: 10;
-            background: rgba(0,0,0,0.8); border-radius: 20px; 
-            backdrop-filter: blur(12px); border: 1px solid var(--border);
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 20px;
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            width: 32px; height: 32px; overflow: hidden;
-            display: flex; flex-direction: column; align-items: center;
+            width: 32px;
+            height: 32px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
+
         .preview-controls.is-open {
-            width: 80px; height: auto; border-radius: 12px; padding: 8px 4px;
+            width: 80px;
+            height: auto;
+            border-radius: 12px;
+            padding: 8px 4px;
         }
 
         .settings-toggle {
-            width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: var(--text-sub); font-size: 14px; transition: 0.3s;
-            flex-shrink: 0; position: relative;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-sub);
+            font-size: 14px;
+            transition: 0.3s;
+            flex-shrink: 0;
+            position: relative;
         }
-        .settings-toggle:hover { color: #fff; transform: rotate(45deg); }
-        .preview-controls.is-open .settings-toggle { transform: rotate(90deg); color: var(--accent); }
+
+        .settings-toggle:hover {
+            color: #fff;
+            transform: rotate(45deg);
+        }
+
+        .preview-controls.is-open .settings-toggle {
+            transform: rotate(90deg);
+            color: var(--accent);
+        }
 
         /* Mode Indicator Dot */
         .mode-dot {
-            position: absolute; top: 6px; right: 6px; width: 6px; height: 6px;
-            border-radius: 50%; background: #535353; border: 1px solid #000;
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #535353;
+            border: 1px solid #000;
         }
-        .mode-dot.is-manual { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+
+        .mode-dot.is-manual {
+            background: var(--accent);
+            box-shadow: 0 0 8px var(--accent);
+        }
 
         .controls-content {
-            opacity: 0; display: flex; flex-direction: column; gap: 10px; 
-            transition: 0.3s; pointer-events: none; width: 100%; align-items: center;
+            opacity: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: 0.3s;
+            pointer-events: none;
+            width: 100%;
+            align-items: center;
         }
-        .preview-controls.is-open .controls-content { opacity: 1; pointer-events: auto; }
+
+        .preview-controls.is-open .controls-content {
+            opacity: 1;
+            pointer-events: auto;
+        }
 
         .manual-btn {
-            background: #fff; border: none; color: #000;
-            font-size: 8px; padding: 4px 8px; border-radius: 20px; cursor: pointer;
-            font-weight: 900; text-transform: uppercase; letter-spacing: 0.3px; width: 90%;
+            background: #fff;
+            border: none;
+            color: #000;
+            font-size: 8px;
+            padding: 4px 8px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            width: 90%;
         }
-        .manual-btn:hover { background: var(--accent); }
+
+        .manual-btn:hover {
+            background: var(--accent);
+        }
 
         .switch {
-            position: relative; display: inline-block; width: 32px; height: 18px;
+            position: relative;
+            display: inline-block;
+            width: 32px;
+            height: 18px;
         }
-        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
         .slider {
-            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #535353; transition: .4s; border-radius: 18px;
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #535353;
+            transition: .4s;
+            border-radius: 18px;
         }
+
         .slider:before {
-            position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px;
-            background-color: white; transition: .4s; border-radius: 50%;
+            position: absolute;
+            content: "";
+            height: 12px;
+            width: 12px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
         }
-        input:checked + .slider { background-color: var(--accent); }
-        input:checked + .slider:before { transform: translateX(14px); }
-        .mode-text { font-size: 8px; font-weight: 900; color: var(--text-sub); text-align: center; margin-bottom: 3px; text-transform: uppercase; }
+
+        input:checked+.slider {
+            background-color: var(--accent);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(14px);
+        }
+
+        .mode-text {
+            font-size: 8px;
+            font-weight: 900;
+            color: var(--text-sub);
+            text-align: center;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+        }
 
         .camera-btn {
-            position: absolute; bottom: 12px; right: 12px;
-            background: rgba(255,255,255,0.1); border: 1px solid var(--border); color: white;
-            padding: 8px 16px; border-radius: 500px; cursor: pointer; font-size: 10px; font-weight: 800; z-index: 10;
-            transition: 0.2s; backdrop-filter: blur(6px);
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 500px;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: 800;
+            z-index: 10;
+            transition: 0.2s;
+            backdrop-filter: blur(6px);
         }
-        .camera-btn:hover { background: #fff; color: #000; }
-        
-        .close-btn { 
-            background: #fff; color: #000; width: 32px; height: 32px; 
-            border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px;
+
+        .camera-btn:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        .close-btn {
+            background: #fff;
+            color: #000;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
         }
 
         /* Camera Modal */
         #cameraContainer {
-            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 600px; height: 600px; max-width: 95vw; max-height: 95vh;
-            background: #000; border-radius: 20px; z-index: 1000;
-            box-shadow: 0 0 0 10000px rgba(0,0,0,0.7), 0 20px 60px rgba(0,0,0,0.8);
-            border: 1px solid var(--border); overflow: hidden;
-        }
-        #cameraVideo { width: 100%; height: 100%; object-fit: cover; }
-        .camera-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; justify-content: flex-end;
-            padding: 30px; background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 40%);
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            max-width: 95vw;
+            max-height: 95vh;
+            background: #000;
+            border-radius: 20px;
+            z-index: 1000;
+            box-shadow: 0 0 0 10000px rgba(0, 0, 0, 0.7), 0 20px 60px rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--border);
+            overflow: hidden;
         }
 
-        #ui::-webkit-scrollbar { width: 8px; }
-        #ui::-webkit-scrollbar-thumb { background: #4f4f4f; border-radius: 8px; }
-        #ui::-webkit-scrollbar-thumb:hover { background: #777; }
+        #cameraVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .camera-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 30px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 40%);
+        }
+
+        #ui::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #ui::-webkit-scrollbar-thumb {
+            background: #4f4f4f;
+            border-radius: 8px;
+        }
+
+        #ui::-webkit-scrollbar-thumb:hover {
+            background: #777;
+        }
     </style>
 </head>
 
@@ -316,7 +618,8 @@ b)以下のテイストで表示します
                     <div class="controls-content">
                         <div class="mode-text" id="modeText1">AUTO</div>
                         <label class="switch"><input type="checkbox" id="toggle1"><span class="slider"></span></label>
-                        <button class="manual-btn" onclick="document.getElementById('manualIn1').click()">Manual</button>
+                        <button class="manual-btn"
+                            onclick="document.getElementById('manualIn1').click()">Manual</button>
                     </div>
                 </div>
                 <img id="img1">
@@ -333,7 +636,8 @@ b)以下のテイストで表示します
                     <div class="controls-content">
                         <div class="mode-text" id="modeText2">AUTO</div>
                         <label class="switch"><input type="checkbox" id="toggle2"><span class="slider"></span></label>
-                        <button class="manual-btn" onclick="document.getElementById('manualIn2').click()">Manual</button>
+                        <button class="manual-btn"
+                            onclick="document.getElementById('manualIn2').click()">Manual</button>
                     </div>
                 </div>
                 <img id="img2">
@@ -350,7 +654,8 @@ b)以下のテイストで表示します
                     <div class="controls-content">
                         <div class="mode-text" id="modeText3">AUTO</div>
                         <label class="switch"><input type="checkbox" id="toggle3"><span class="slider"></span></label>
-                        <button class="manual-btn" onclick="document.getElementById('manualIn3').click()">Manual</button>
+                        <button class="manual-btn"
+                            onclick="document.getElementById('manualIn3').click()">Manual</button>
                     </div>
                 </div>
                 <img id="img3">
@@ -407,14 +712,14 @@ b)以下のテイストで表示します
             const modeText = document.getElementById(`modeText${id}`);
             const modeDot = document.getElementById(`modeDot${id}`);
             const toggle = document.getElementById(`toggle${id}`);
-            
+
             toggle.checked = state.isManual;
             const activeUrl = state.isManual ? state.manual : state.auto;
             if (activeUrl) img.src = activeUrl;
-            
+
             modeText.innerText = state.isManual ? "MANUAL" : "AUTO";
             modeText.style.color = state.isManual ? "var(--success)" : "#94a3b8";
-            
+
             if (state.isManual) modeDot.classList.add('is-manual');
             else modeDot.classList.remove('is-manual');
         }
