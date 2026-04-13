@@ -521,6 +521,14 @@
             <div class="status-item" id="st-4"><span class="status-icon">⚪</span> Stage 4: 3D Mapping</div>
         </div>
 
+        <div class="input-group" style="border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 20px;">
+            <label>API Key (Optional Fallback)</label>
+            <input type="password" id="falKeyInput" placeholder="Enter FAL_KEY if environment variable fails">
+            <p style="font-size: 9px; color: var(--text-sub); margin-top: 6px;">
+                ※直接入力すると、サーバーの制限を回避して高速に動作します。入力しない場合は、Vercelの環境変数を使用します。
+            </p>
+        </div>
+
 
         <div class="input-group">
             <label>1. Person Photo</label>
@@ -684,7 +692,8 @@ b)以下のテイストで表示します
 {
     "imports": {
         "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "fal": "https://esm.sh/@fal-ai/client@^1.2.0"
     }
 }
 </script>
