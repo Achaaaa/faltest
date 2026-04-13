@@ -25,17 +25,28 @@ export default async function handler(req, res) {
   }
 
   const { isEdit, payload } = req.body || {};
-  
+
   if (!payload) {
     return res.status(400).json({ error: 'Missing payload in request body' });
   }
 
   const endpoint = isEdit ? "fal-ai/nano-banana-2/edit" : "fal-ai/nano-banana-2";
-  
+
   // The SDK automatically uses the FAL_KEY environment variable
   if (!process.env.FAL_KEY) {
-    console.error("[API] FAL_KEY environment variable is not set.");
-    return res.status(500).json({ error: 'FAL_KEY environment variable is not set in the server environment.' });
+    const envKeys = Object.keys(process.env).filter(k => !k.startsWith('VERCEL_')).sort();
+    console.error("[API] FAL_KEY is missing.");
+    console.error("[API] Available Env Keys (excluding VERCEL_*):", envKeys.join(', '));
+    console.error("[API] Current NODE_ENV:", process.env.NODE_ENV);
+
+    return res.status(500).json({
+      error: 'FAL_KEY environment variable is not set in the server environment.',
+      debug_info: {
+        env_keys_found: envKeys,
+        node_env: process.env.NODE_ENV,
+        hint: 'Please check your Vercel Dashboard -> Settings -> Environment Variables and ensure FAL_KEY is added to all environments (Production, Preview, Development).'
+      }
+    });
   }
 
   try {
@@ -52,7 +63,7 @@ export default async function handler(req, res) {
     // Return a more descriptive error if possible
     const status = error.status || 500;
     const message = error.message || "An error occurred while calling the fal.ai API";
-    return res.status(status).json({ 
+    return res.status(status).json({
       error: message,
       details: error.data || null
     });
