@@ -2,27 +2,59 @@ import { fal } from "@fal-ai/client";
 
 // Secure API Proxy using the official fal.ai SDK
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' });
+  // Add CORS headers for local development if needed
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
+
+  // Handle preflight request
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
   }
 
-  const { isEdit, payload } = req.body;
+  // Add some basic request logging for debugging
+  const bodySize = req.body ? JSON.stringify(req.body).length : 0;
+  console.log(`[API] Method: ${req.method}, Path: /api/generate, Body Size: ${(bodySize / 1024).toFixed(2)} KB`);
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method not allowed. Please use POST.' });
+  }
+
+  const { isEdit, payload } = req.body || {};
+  
+  if (!payload) {
+    return res.status(400).json({ error: 'Missing payload in request body' });
+  }
+
   const endpoint = isEdit ? "fal-ai/nano-banana-2/edit" : "fal-ai/nano-banana-2";
   
   // The SDK automatically uses the FAL_KEY environment variable
   if (!process.env.FAL_KEY) {
-    return res.status(500).json({ error: 'FAL_KEY environment variable is not set' });
+    console.error("[API] FAL_KEY environment variable is not set.");
+    return res.status(500).json({ error: 'FAL_KEY environment variable is not set in the server environment.' });
   }
 
   try {
+    console.log(`[API] Calling fal.ai endpoint: ${endpoint}`);
     // Using fal.run for high-speed response models like nano-banana-2
     const result = await fal.run(endpoint, {
       input: payload
     });
 
+    console.log("[API] Successfully received response from fal.ai");
     return res.status(200).json(result);
   } catch (error) {
-    console.error("fal.ai SDK Error:", error);
-    return res.status(500).json({ error: error.message });
+    console.error("[API] fal.ai SDK Error:", error);
+    // Return a more descriptive error if possible
+    const status = error.status || 500;
+    const message = error.message || "An error occurred while calling the fal.ai API";
+    return res.status(status).json({ 
+      error: message,
+      details: error.data || null
+    });
   }
 }
