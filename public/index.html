@@ -83,7 +83,7 @@
             letter-spacing: 0.5px;
         }
 
-        input[type="password"],
+        input[type="text"],
         textarea {
             width: 100%;
             background: var(--bg-card);
@@ -95,7 +95,7 @@
             transition: all 0.25s;
         }
 
-        input[type="password"]:focus,
+        input[type="text"]:focus,
         textarea:focus {
             background: var(--bg-hover);
             border-color: #535353;
@@ -201,14 +201,9 @@
             transform: scale(1.04);
         }
 
-        #genBtn:active {
-            transform: scale(0.98);
-        }
-
         #genBtn:disabled {
             background: #535353;
             cursor: not-allowed;
-            transform: none;
             color: #b3b3b3;
         }
 
@@ -216,11 +211,6 @@
             background: transparent;
             color: var(--text-main);
             border: 1px solid #727272;
-        }
-
-        #applyCurrentBtn:hover {
-            border-color: #fff;
-            transform: scale(1.04);
         }
 
         .preview-grid {
@@ -243,11 +233,6 @@
             transition: 0.3s;
         }
 
-        .preview-box:hover {
-            background: var(--bg-hover);
-            transform: translateY(-4px);
-        }
-
         .preview-box img {
             width: 100%;
             height: calc(100% - 24px);
@@ -263,7 +248,6 @@
             text-align: center;
             margin-top: 8px;
             text-transform: uppercase;
-            letter-spacing: 0.6px;
         }
 
         .preview-controls {
@@ -275,7 +259,7 @@
             border-radius: 20px;
             backdrop-filter: blur(12px);
             border: 1px solid var(--border);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s;
             width: 32px;
             height: 32px;
             overflow: hidden;
@@ -300,22 +284,8 @@
             cursor: pointer;
             color: var(--text-sub);
             font-size: 14px;
-            transition: 0.3s;
-            flex-shrink: 0;
-            position: relative;
         }
 
-        .settings-toggle:hover {
-            color: #fff;
-            transform: rotate(45deg);
-        }
-
-        .preview-controls.is-open .settings-toggle {
-            transform: rotate(90deg);
-            color: var(--accent);
-        }
-
-        /* Mode Indicator Dot */
         .mode-dot {
             position: absolute;
             top: 6px;
@@ -324,7 +294,6 @@
             height: 6px;
             border-radius: 50%;
             background: #535353;
-            border: 1px solid #000;
         }
 
         .mode-dot.is-manual {
@@ -337,10 +306,9 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            transition: 0.3s;
-            pointer-events: none;
             width: 100%;
             align-items: center;
+            pointer-events: none;
         }
 
         .preview-controls.is-open .controls-content {
@@ -357,13 +325,7 @@
             border-radius: 20px;
             cursor: pointer;
             font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
             width: 90%;
-        }
-
-        .manual-btn:hover {
-            background: var(--accent);
         }
 
         .switch {
@@ -416,7 +378,6 @@
             font-weight: 900;
             color: var(--text-sub);
             text-align: center;
-            margin-bottom: 3px;
             text-transform: uppercase;
         }
 
@@ -433,28 +394,8 @@
             font-size: 10px;
             font-weight: 800;
             z-index: 10;
-            transition: 0.2s;
-            backdrop-filter: blur(6px);
         }
 
-        .camera-btn:hover {
-            background: #fff;
-            color: #000;
-        }
-
-        .close-btn {
-            background: #fff;
-            color: #000;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-        }
-
-        /* Camera Modal */
         #cameraContainer {
             display: none;
             position: fixed;
@@ -463,14 +404,10 @@
             transform: translate(-50%, -50%);
             width: 600px;
             height: 600px;
-            max-width: 95vw;
-            max-height: 95vh;
             background: #000;
             border-radius: 20px;
             z-index: 1000;
-            box-shadow: 0 0 0 10000px rgba(0, 0, 0, 0.7), 0 20px 60px rgba(0, 0, 0, 0.8);
-            border: 1px solid var(--border);
-            overflow: hidden;
+            box-shadow: 0 0 0 10000px rgba(0, 0, 0, 0.7);
         }
 
         #cameraVideo {
@@ -489,20 +426,12 @@
             flex-direction: column;
             justify-content: flex-end;
             padding: 30px;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 40%);
         }
 
-        #ui::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        #ui::-webkit-scrollbar-thumb {
-            background: #4f4f4f;
-            border-radius: 8px;
-        }
-
-        #ui::-webkit-scrollbar-thumb:hover {
-            background: #777;
+        .snap-btn {
+            background: var(--accent);
+            color: #000;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -521,17 +450,11 @@
             <div class="status-item" id="st-4"><span class="status-icon">⚪</span> Stage 4: 3D Mapping</div>
         </div>
 
-        <div class="input-group"
-            style="border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 20px;">
-            <label>API Key (Optional Fallback)</label>
-            <input type="text" id="falKeyInput" placeholder="Enter FAL_KEY if environment variable fails">
-            <button type="button" id="testKeyBtn"
-                style="margin-top: 10px; background: #334155; padding: 8px; font-size: 11px;">Test Connection</button>
-            <p style="font-size: 9px; color: var(--text-sub); margin-top: 6px;">
-                ※直接入力すると、サーバーの制限を回避して高速に動作します。
-            </p>
+        <div class="input-group" style="background: rgba(29, 185, 84, 0.1); padding: 15px; border-radius: 8px; border: 1px solid var(--accent); margin-bottom: 24px;">
+            <label style="color: var(--accent);">FAL_KEY (Required)</label>
+            <input type="text" id="falKeyInput" placeholder="xxxx-xxxx-xxxx:yyyy-yyyy">
+            <button type="button" id="testKeyBtn" style="margin-top: 10px; height: 36px; padding: 0; font-size: 11px;">Test Connection</button>
         </div>
-
 
         <div class="input-group">
             <label>1. Person Photo</label>
@@ -544,69 +467,13 @@
         </div>
 
         <div class="input-group">
-            <label>1. Styled Prompt</label>
-            <textarea id="p2" rows="2">１枚目の人物を２枚目のスタイルに変換、デフォルメして。
-
-目的と目標:
-
-* ユーザーから提供された写真の人物を、3Dフィギュアのようなテイストにした後、それをアメコミのスタイルに変換した全身画像を生成します。
-
-* ユーザー写真の髪型、顔だち、着ているもの、アクセサリーなどの身体的特徴を忠実に引き継ぎます。
-
-
-
-行動とルール:
-
-
-
-1) 入力内容の分析:
-
-ユーザーがアップロードした人物写真から、顔の特徴、服装を詳細に把握します。
-
-
-
-2) 画像生成のプロセス:
-
- a) 写真の人物の顔と体をデフォルメします。
-
--大きくデフォルメされた瞳。左目の瞳の中に白抜きで 'J' の文字、右目の瞳の中に 'B' の文字がはっきりと描かれている。無表情でクールな顔立ち。
-
--口は小さく、首が細く、肩幅は極端に狭く。足はかなり大きくデフォルメする。
-
--極端にデフォルメされた5等身（大きな頭、小さな体、非常に大きな足）。ちびキャラ（Chibi）スタイル。
-
-
-
-
-
-b)以下のテイストで表示します
-
--レトロでヴィンテージなアメリカン・コミックスの印刷スタイル。画像は古くて不完全なオフセット印刷機で印刷されたように見え、すべての色や影の部分は、目に見える網点（ベンデイドット）パターンによって構成されている。
-
--人物のポーズは、躍動感のあるダンシングスタイルで広角レンズを意識させるダイナミックな構図で描きます。
-
--背景はキャラクターを引き立てるビビッドな単色（黄色、赤、青、ピンク、水色、緑など）に設定
-
--余計なオブジェクトを排除。
-
--コマ割りはせず、単色背景にキャラクターのみ配置された状態にします。
-
-
-
-全体のトーン:
-
-* エネルギッシュで、コミカル。
-
-* ユーザーの写真をヒーローのように変身させるワクワク感を演出し、クリエイティブな提案を積極的に行います。</textarea>
+            <label>Detailed Prompt</label>
+            <textarea id="p2" rows="4">１枚目の人物を２枚目のスタイルに変換、デフォルメして。
+髪型、顔だち、服装の特徴を忠実に引き継ぎ、ちびキャラ（Chibi）スタイルでアメリカン・コミックス風に仕上げて。</textarea>
         </div>
 
         <div class="input-group">
-            <label>2. Pattern Prompt</label>
-            <textarea id="p3" rows="3">１枚目の画像を２枚目の四肢の長さ、頭身、手足の大きさ、レイアウトにして。</textarea>
-        </div>
-
-        <div class="input-group">
-            <label>2. Pattern Guide</label>
+            <label>T-Pose Pattern Guide</label>
             <div class="file-input-area" id="uvDropArea">
                 <span class="file-input-label" id="uvLabel">Upload Pattern Guide</span>
                 <img id="uvPatternPreview">
@@ -615,68 +482,49 @@ b)以下のテイストで表示します
         </div>
 
         <button id="genBtn">START PIPELINE</button>
-        <button id="applyCurrentBtn"
-            style="background:#1e293b; border: 1px solid var(--accent); margin-top: -10px; font-size: 11px; padding: 12px;">APPLY
-            CURRENT (SKIP AI)</button>
+        <button id="applyCurrentBtn" style="background:#1e293b; color: white; margin-top: -10px; font-size: 11px;">APPLY CURRENT (SKIP AI)</button>
 
         <div class="preview-grid">
-            <!-- Box 1 -->
             <div class="preview-box">
                 <div class="preview-controls" id="controls1">
-                    <div class="settings-toggle" onclick="toggleSettings(1)">
-                        ⚙️<div class="mode-dot" id="modeDot1"></div>
-                    </div>
+                    <div class="settings-toggle" onclick="toggleSettings(1)">⚙️<div class="mode-dot" id="modeDot1"></div></div>
                     <div class="controls-content">
                         <div class="mode-text" id="modeText1">AUTO</div>
                         <label class="switch"><input type="checkbox" id="toggle1"><span class="slider"></span></label>
-                        <button class="manual-btn"
-                            onclick="document.getElementById('manualIn1').click()">Manual</button>
+                        <button class="manual-btn" onclick="document.getElementById('manualIn1').click()">Manual</button>
                     </div>
                 </div>
-                <img id="img1">
-                <input type="file" id="manualIn1" accept="image/*" style="display:none;">
+                <img id="img1"><input type="file" id="manualIn1" accept="image/*" style="display:none;">
                 <div class="p-label">1. Styled</div>
             </div>
 
-            <!-- Box 2 -->
             <div class="preview-box">
                 <div class="preview-controls" id="controls2">
-                    <div class="settings-toggle" onclick="toggleSettings(2)">
-                        ⚙️<div class="mode-dot" id="modeDot2"></div>
-                    </div>
+                    <div class="settings-toggle" onclick="toggleSettings(2)">⚙️<div class="mode-dot" id="modeDot2"></div></div>
                     <div class="controls-content">
                         <div class="mode-text" id="modeText2">AUTO</div>
                         <label class="switch"><input type="checkbox" id="toggle2"><span class="slider"></span></label>
-                        <button class="manual-btn"
-                            onclick="document.getElementById('manualIn2').click()">Manual</button>
+                        <button class="manual-btn" onclick="document.getElementById('manualIn2').click()">Manual</button>
                     </div>
                 </div>
-                <img id="img2">
-                <input type="file" id="manualIn2" accept="image/*" style="display:none;">
-                <div class="p-label">2. Color Pattern</div>
+                <img id="img2"><input type="file" id="manualIn2" accept="image/*" style="display:none;">
+                <div class="p-label">2. Pattern</div>
             </div>
 
-            <!-- Box 3 -->
             <div class="preview-box">
                 <div class="preview-controls" id="controls3">
-                    <div class="settings-toggle" onclick="toggleSettings(3)">
-                        ⚙️<div class="mode-dot" id="modeDot3"></div>
-                    </div>
+                    <div class="settings-toggle" onclick="toggleSettings(3)">⚙️<div class="mode-dot" id="modeDot3"></div></div>
                     <div class="controls-content">
                         <div class="mode-text" id="modeText3">AUTO</div>
                         <label class="switch"><input type="checkbox" id="toggle3"><span class="slider"></span></label>
-                        <button class="manual-btn"
-                            onclick="document.getElementById('manualIn3').click()">Manual</button>
+                        <button class="manual-btn" onclick="document.getElementById('manualIn3').click()">Manual</button>
                     </div>
                 </div>
-                <img id="img3">
-                <input type="file" id="manualIn3" accept="image/*" style="display:none;">
-                <div class="p-label">3. B&W Mask</div>
+                <img id="img3"><input type="file" id="manualIn3" accept="image/*" style="display:none;">
+                <div class="p-label">3. Mask</div>
             </div>
 
-            <div class="preview-box"><img id="img4">
-                <div class="p-label">4. Model Result</div>
-            </div>
+            <div class="preview-box"><img id="img4"><div class="p-label">4. Result</div></div>
         </div>
     </div>
 
@@ -684,22 +532,20 @@ b)以下のテイストで表示します
     <div id="cameraContainer">
         <video id="cameraVideo" autoplay playsinline></video>
         <div class="camera-overlay">
-            <div class="camera-ui">
-                <button class="snap-btn" id="snapBtn">CAPTURE PHOTO</button>
-                <button class="close-btn" id="stopCamBtn">✕</button>
-            </div>
+            <button class="snap-btn" id="snapBtn">CAPTURE PHOTO</button>
+            <button class="close-btn" id="hideCamBtn">✕</button>
         </div>
     </div>
 
     <script type="importmap">
-{
-    "imports": {
-        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
-        "fal": "https://esm.sh/@fal-ai/client@^1.2.0"
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+            "fal": "https://esm.sh/@fal-ai/client@^1.2.0"
+        }
     }
-}
-</script>
+    </script>
 
     <script type="module">
         import * as THREE from 'three';
@@ -709,335 +555,87 @@ b)以下のテイストで表示します
 
         let scene, camera, renderer, model, mixer, clock;
         let basePhotoB64 = null, uvPatternB64 = null;
+        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-        // --- Central State Management ---
         const textureState = {
             1: { auto: null, manual: null, isManual: false },
             2: { auto: null, manual: null, isManual: false },
             3: { auto: null, manual: null, isManual: false }
         };
 
-        // Persistent Key Support
-        window.addEventListener('load', () => {
-            const savedKey = localStorage.getItem('fal_manual_key');
-            if (savedKey) {
-                document.getElementById('falKeyInput').value = savedKey;
-            }
-        });
-
-        // Sleep helper for stability
-        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-
-        // Helper to update the visible image and labels in a preview box
-        function updatePreview(id) {
-            const state = textureState[id];
-            const img = document.getElementById(`img${id}`);
-            const modeText = document.getElementById(`modeText${id}`);
-            const modeDot = document.getElementById(`modeDot${id}`);
-            const toggle = document.getElementById(`toggle${id}`);
-
-            toggle.checked = state.isManual;
-            const activeUrl = state.isManual ? state.manual : state.auto;
-            if (activeUrl) img.src = activeUrl;
-
-            modeText.innerText = state.isManual ? "MANUAL" : "AUTO";
-            modeText.style.color = state.isManual ? "var(--success)" : "#94a3b8";
-
-            if (state.isManual) modeDot.classList.add('is-manual');
-            else modeDot.classList.remove('is-manual');
-        }
-
-        window.toggleSettings = (id) => {
-            const el = document.getElementById(`controls${id}`);
-            el.classList.toggle('is-open');
-        };
-
-        // Initialize Multi-step UI Controls
-        [1, 2, 3].forEach(id => {
-            const toggle = document.getElementById(`toggle${id}`);
-            const manualIn = document.getElementById(`manualIn${id}`);
-
-            toggle.onchange = () => {
-                textureState[id].isManual = toggle.checked;
-                updatePreview(id);
-                if (id >= 2) applyToModel(); // Instantly update 3D preview for Stage 2/3 changes
-            };
-
-            manualIn.onchange = (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    textureState[id].manual = ev.target.result;
-                    textureState[id].isManual = true;
-                    updatePreview(id);
-                    if (id >= 2) applyToModel();
-                };
-                reader.readAsDataURL(file);
-            };
-        });
-
-        // --- Status Tracker ---
-        function updateStatus(step, state) {
-            const item = document.getElementById(`st-${step}`);
-            const icon = item.querySelector('.status-icon');
-            if (!item || !icon) return;
-            item.classList.remove('active', 'done');
-            if (state === 'loading') { item.classList.add('active'); icon.innerText = '⏳'; }
-            else if (state === 'done') { item.classList.add('done'); icon.innerText = '✅'; }
-            else { icon.innerText = '⚪'; }
-        }
-
-        // --- Main Input File Loaders (Stage 1&2 Source) ---
-        const setupFile = (clickId, inputId, previewId, labelId, setter) => {
-            const area = document.getElementById(clickId);
-            const input = document.getElementById(inputId);
-            if (!area || !input) return;
-
-            area.onclick = () => input.click();
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    setter(ev.target.result);
-                    document.getElementById(previewId).src = ev.target.result;
-                    document.getElementById(labelId).style.visibility = 'hidden';
-                };
-                reader.readAsDataURL(file);
-            };
-        };
-        setupFile('photoDropArea', 'photoInput', 'photoPreview', 'photoLabel', (v) => basePhotoB64 = v);
-        setupFile('uvDropArea', 'uvInput', 'uvPatternPreview', 'uvLabel', (v) => uvPatternB64 = v);
-
-        // --- Load Default Pattern ---
-        async function loadDefaultPattern() {
-            try {
-                const response = await fetch('PatternGuide.png');
-                if (!response.ok) throw new Error('Default pattern not found');
-                const blob = await response.blob();
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    uvPatternB64 = e.target.result;
-                    document.getElementById('uvPatternPreview').src = uvPatternB64;
-                    document.getElementById('uvLabel').style.visibility = 'hidden';
-                };
-                reader.readAsDataURL(blob);
-            } catch (err) {
-                console.warn("Could not load default PatternGuide.png. Manual upload required. Details:", err.message);
-            }
-        }
-        loadDefaultPattern();
-
-        // --- Camera Logic ---
-        let cameraStream = null;
-        const camContainer = document.getElementById('cameraContainer');
-        const camVideo = document.getElementById('cameraVideo');
-
-        document.getElementById('startCamBtn').onclick = async (e) => {
-            e.stopPropagation();
-            try {
-                cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-                camVideo.srcObject = cameraStream;
-                camContainer.style.display = 'block';
-            } catch (err) {
-                alert("Camera access denied or not available. Details: " + err.message);
-            }
-        };
-
-        const stopCamera = () => {
-            if (cameraStream) {
-                cameraStream.getTracks().forEach(track => track.stop());
-                cameraStream = null;
-            }
-            camContainer.style.display = 'none';
-        };
-
-        document.getElementById('stopCamBtn').onclick = (e) => { e.stopPropagation(); stopCamera(); };
-
-        document.getElementById('snapBtn').onclick = (e) => {
-            e.stopPropagation();
-            if (!camVideo.videoWidth) return;
-            const canvas = document.createElement('canvas');
-            canvas.width = camVideo.videoWidth;
-            canvas.height = camVideo.videoHeight;
-            canvas.getContext('2d').drawImage(camVideo, 0, 0);
-
-            const dataUrl = canvas.toDataURL('image/png');
-            basePhotoB64 = dataUrl;
-            document.getElementById('photoPreview').src = dataUrl;
-            document.getElementById('photoLabel').style.visibility = 'hidden';
-            stopCamera();
-        };
-
-        init();
-        animate();
-
-        // --- fal.ai Proxy Fetcher ---
+        // --- Core Utility: falFetch (Pure Client Side) ---
         async function falFetch(isEdit, payload) {
-            console.log(`[Debug] falFetch called at: ${new Date().toLocaleTimeString()}`);
-            try {
-                // If a manual key is provided, use the fal core SDK directly (more secure & avoids proxy limits)
-                let manualKey = document.getElementById('falKeyInput').value.trim();
-                if (manualKey) {
-                    // Automatic Cleaning: remove prefixes like "FAL_KEY=" or quotes if pasted by mistake
-                    manualKey = manualKey.replace(/^FAL_KEY\s*=\s*/i, "").replace(/^['"]|['"]$/g, "").trim();
+            const manualKey = document.getElementById('falKeyInput').value.trim();
+            if (!manualKey) throw new Error("API Key is required. Please enter your FAL_KEY.");
 
-                    console.log("[Client] Configuring global fal credentials.");
-                    fal.config({ credentials: manualKey, proxyUrl: null });
+            // Configure SDK directly
+            fal.config({ credentials: manualKey, proxyUrl: null });
 
-                    console.log("[Client] Using direct fal.ai connection.");
-                    console.log(`[Debug] Cleaned key length: ${manualKey.length}`);
-                    console.log(`[Debug] Cleaned key starts with: ${manualKey.substring(0, 5)}...`);
+            const endpoint = isEdit ? "fal-ai/nano-banana-2/edit" : "fal-ai/nano-banana-2";
+            console.log(`[falFetch] Calling ${endpoint}...`);
+            
+            const result = await fal.run(endpoint, { input: payload });
+            
+            // Wait for CDN propagation
+            await sleep(2000);
+            console.log(`[falFetch] Result received:`, JSON.stringify(result, null, 2));
 
-                    if (!manualKey.includes(":")) {
-                        throw new Error("Invalid API Key format. It should look like 'ID:SECRET' (contains a colon).");
-                    }
+            let url = null;
+            if (result.images && result.images.length > 0) url = result.images[0].url;
+            else if (result.image && result.image.url) url = result.image.url;
+            else if (result.url) url = result.url;
 
-                    const endpoint = isEdit ? "fal-ai/nano-banana-2/edit" : "fal-ai/nano-banana-2";
-                    const result = await fal.run(endpoint, {
-                        input: payload
-                    });
-                    
-                    // Added 2s sleep to ensure CDN propagation
-                    await sleep(2000);
-                    
-                    console.log(`[Client] Success from ${endpoint}. Full Result:`, JSON.stringify(result, null, 2));
-                    
-                    // Try different result patterns (images array, single image object, or direct url)
-                    let url = null;
-                    if (result.images && result.images.length > 0) {
-                        url = result.images[0].url;
-                    } else if (result.image && result.image.url) {
-                        url = result.image.url;
-                    } else if (result.url) {
-                        url = result.url;
-                    }
-
-                    if (!url) {
-                        console.error("[Client] Could not find image URL in result:", result);
-                        throw new Error("No image URL found in the API response.");
-                    }
-                    
-                    console.log(`[Client] Extracted URL: ${url}`);
-                    return url;
-                }
-
-                // Fallback to Serverless Proxy
-                const payloadSize = JSON.stringify(payload).length;
-                if (payloadSize > 4 * 1024 * 1024) { // 4MB threshold for Vercel 4.5MB limit
-                    console.warn(`Payload size (${(payloadSize / 1024 / 1024).toFixed(2)}MB) is near/above Vercel limit.`);
-                }
-
-                const res = await fetch('/api/generate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ isEdit, payload })
-                });
-
-                // Handle non-JSON responses (like Vercel errors)
-                const contentType = res.headers.get("content-type");
-                if (!contentType || !contentType.includes("application/json")) {
-                    const errorText = await res.text();
-                    console.error("Non-JSON response:", errorText);
-                    if (res.status === 413) throw new Error("Image size too large for the server. Please use smaller photos.");
-                    if (res.status === 504) throw new Error("Request timed out. Please try again.");
-                    throw new Error(`Server Error (${res.status}): ${errorText.substring(0, 100)}...`);
-                }
-
-                const data = await res.json();
-                if (!res.ok) {
-                    throw new Error(data.error || data.message || "Unknown API Error");
-                }
-                if (!data.images || data.images.length === 0) throw new Error("No images generated by fal.ai.");
-                return data.images[0].url;
-            } catch (err) {
-                console.error("falFetch failed:", err);
-
-                // Detailed error messaging for direct SDK calls
-                if (err.status === 401) {
-                    throw new Error("Invalid API Key. Please check the FAL_KEY you entered in the input field.");
-                }
-                if (err.status === 402) {
-                    throw new Error("Insufficient balance in your fal.ai account.");
-                }
-                if (err.data && err.data.detail) {
-                    throw new Error(`fal.ai Error: ${err.data.detail}`);
-                }
-                throw err;
-            }
+            if (!url) throw new Error("Could not find image URL in the response.");
+            return url;
         }
 
         async function run() {
             if (!basePhotoB64 || !uvPatternB64) return alert("Please upload both photos!");
+            const manualKey = document.getElementById('falKeyInput').value.trim();
+            if (!manualKey) return alert("Please enter your FAL_KEY first!");
+
             const btn = document.getElementById('genBtn');
             btn.disabled = true;
-            [1, 2, 3, 4].forEach(i => updateStatus(i, 'idle'));
+            for(let i=1; i<=4; i++) updateStatus(i, 'idle');
 
             try {
                 // Stage 1: Style
-                let res1 = (textureState[1].isManual && textureState[1].manual) ? textureState[1].manual : null;
-                if (!res1) {
-                    updateStatus(1, 'loading');
-                    console.log("[Pipeline] Starting Stage 1: Style...");
-                    res1 = await falFetch(true, {
-                        prompt: document.getElementById('p2').value,
-                        image_urls: [basePhotoB64]
-                    });
-                    console.log("[Pipeline] Stage 1 Results:", res1);
-                    textureState[1].auto = res1;
-                    updatePreview(1);
-                    updateStatus(1, 'done');
-                } else {
-                    updateStatus(1, 'done');
-                }
-
-                await sleep(1000); // Wait for fal.ai to stabilize CDN
-
-                // Stage 2: Dual-Guide T-Pose Pattern Matching
-                let res2 = (textureState[2].isManual && textureState[2].manual) ? textureState[2].manual : null;
-                if (!res2) {
-                    updateStatus(2, 'loading');
-                    console.log("[Pipeline] Starting Stage 2: Pattern Matching...");
-                    res2 = await falFetch(true, {
-                        prompt: document.getElementById('p3').value,
-                        image_urls: [res1, uvPatternB64],
-                    });
-                    console.log("[Pipeline] Stage 2 Results:", res2);
-                    textureState[2].auto = res2;
-                    updatePreview(2);
-                    updateStatus(2, 'done');
-                } else {
-                    updateStatus(2, 'done');
-                }
-
+                updateStatus(1, 'loading');
+                const res1 = await falFetch(true, {
+                    prompt: document.getElementById('p2').value,
+                    image_urls: [basePhotoB64]
+                });
+                textureState[1].auto = res1;
+                updatePreview(1);
+                updateStatus(1, 'done');
                 await sleep(1000);
 
-                // Stage 3: Generate Alpha Mask
-                let res3 = (textureState[3].isManual && textureState[3].manual) ? textureState[3].manual : null;
-                if (!res3) {
-                    updateStatus(3, 'loading');
-                    console.log("[Pipeline] Starting Stage 3: Alpha Mask...");
-                    res3 = await falFetch(true, {
-                        prompt: "Professional 2D game mask texture, high contrast black and white, white silhouette of the character from Image 1, pure black background, no gray areas, sharp edges",
-                        image_urls: [res2]
-                    });
-                    console.log("[Pipeline] Stage 3 Results:", res3);
-                    textureState[3].auto = res3;
-                    updatePreview(3);
-                    updateStatus(3, 'done');
-                } else {
-                    updateStatus(3, 'done');
-                }
+                // Stage 2: T-Pose Pattern Matching
+                updateStatus(2, 'loading');
+                const res2 = await falFetch(true, {
+                    prompt: "Convert to T-pose pattern guide using the guide from Image 2",
+                    image_urls: [res1, uvPatternB64]
+                });
+                textureState[2].auto = res2;
+                updatePreview(2);
+                updateStatus(2, 'done');
+                await sleep(1000);
+
+                // Stage 3: Alpha Mask
+                updateStatus(3, 'loading');
+                const res3 = await falFetch(true, {
+                    prompt: "Professional 2D game mask texture, high contrast black and white silhouette",
+                    image_urls: [res2]
+                });
+                textureState[3].auto = res3;
+                updatePreview(3);
+                updateStatus(3, 'done');
 
                 // Stage 4: Apply to Model
                 await applyToModel();
-
             } catch (e) {
-                alert("Error: " + e.message);
+                alert("Generation Error: " + e.message);
+                console.error(e);
             } finally {
                 btn.disabled = false;
             }
@@ -1054,38 +652,55 @@ b)以下のテイストで表示します
             }
 
             const loader = new THREE.TextureLoader();
-            const loadTex = (url) => new Promise(resolve => loader.load(url, resolve));
+            const [texColor, texMask] = await Promise.all([
+                new Promise(r => loader.load(colorSrc, r)),
+                new Promise(r => loader.load(maskSrc, r))
+            ]);
 
-            try {
-                const [texColor, texMask] = await Promise.all([
-                    loadTex(colorSrc),
-                    loadTex(maskSrc)
-                ]);
+            texColor.colorSpace = THREE.SRGBColorSpace;
+            texColor.flipY = true;
+            texMask.flipY = true;
 
-                texColor.colorSpace = THREE.SRGBColorSpace;
-                texColor.flipY = true;
-                texMask.flipY = true;
-
-                if (model) {
-                    model.traverse(c => {
-                        if (c.isMesh) {
-                            c.material.map = texColor;
-                            c.material.alphaMap = texMask;
-                            c.material.transparent = true;
-                            c.material.alphaTest = 0.5;
-                            c.material.side = THREE.DoubleSide;
-                            c.material.needsUpdate = true;
-                        }
-                    });
-                }
-                updateStatus(4, 'done');
-            } catch (err) {
-                console.error("Texture loading failed", err);
-                updateStatus(4, 'idle');
+            if (model) {
+                model.traverse(c => {
+                    if (c.isMesh) {
+                        c.material.map = texColor;
+                        c.material.alphaMap = texMask;
+                        c.material.transparent = true;
+                        c.material.alphaTest = 0.5;
+                        c.material.needsUpdate = true;
+                    }
+                });
             }
+            updateStatus(4, 'done');
+            document.getElementById('img4').src = colorSrc;
         }
 
+        function updatePreview(id) {
+            const state = textureState[id];
+            const img = document.getElementById(`img${id}`);
+            const modeText = document.getElementById(`modeText${id}`);
+            const modeDot = document.getElementById(`modeDot${id}`);
+            const toggle = document.getElementById(`toggle${id}`);
+            toggle.checked = state.isManual;
+            const src = state.isManual ? state.manual : state.auto;
+            if (src) img.src = src;
+            modeText.innerText = state.isManual ? "MANUAL" : "AUTO";
+            state.isManual ? modeDot.classList.add('is-manual') : modeDot.classList.remove('is-manual');
+        }
 
+        window.toggleSettings = (id) => document.getElementById(`controls${id}`).classList.toggle('is-open');
+
+        function updateStatus(step, state) {
+            const item = document.getElementById(`st-${step}`);
+            const icon = item.querySelector('.status-icon');
+            item.classList.remove('active', 'done');
+            if (state === 'loading') { item.classList.add('active'); icon.innerText = '⏳'; }
+            else if (state === 'done') { item.classList.add('done'); icon.innerText = '✅'; }
+            else icon.innerText = '⚪';
+        }
+
+        // --- Model Loading & Three.js Setup ---
         function init() {
             const container = document.getElementById('canvas-container');
             scene = new THREE.Scene();
@@ -1099,60 +714,86 @@ b)以下のテイストで表示します
             new FBXLoader().load('peraman.fbx', (obj) => {
                 model = obj;
                 scene.add(obj);
-                obj.traverse(c => {
-                    if (c.isMesh) {
-                        c.material.side = THREE.DoubleSide;
-                        c.material.transparent = true;
-                        c.material.alphaTest = 0.5;
-                    }
-                });
                 mixer = new THREE.AnimationMixer(obj);
                 if (obj.animations && obj.animations.length > 0) mixer.clipAction(obj.animations[0]).play();
-                console.log("Model loaded successfully");
-            }, (progress) => {
-                console.log(`Loading model: ${(progress.loaded / progress.total * 100).toFixed(0)}%`);
-            }, (error) => {
-                console.error("Error loading FBX model:", error);
-                alert("Failed to load 3D model (peraman.fbx). Please check if the file exists in the public directory.");
             });
             new OrbitControls(camera, renderer.domElement).target.set(0, 100, 0);
             document.getElementById('genBtn').onclick = run;
             document.getElementById('applyCurrentBtn').onclick = applyToModel;
 
             document.getElementById('testKeyBtn').onclick = async () => {
-                const key = document.getElementById('falKeyInput').value.trim().replace(/^FAL_KEY\s*=\s*/i, "").replace(/^['"]|['"]$/g, "").trim();
-                if (!key) return alert("Please enter a key first!");
-                if (!key.includes(":")) return alert("Invalid format. Key should contain a colon (ID:SECRET).");
-
-                // Save it for later
+                const key = document.getElementById('falKeyInput').value.trim();
+                if (!key) return alert("Enter key!");
                 localStorage.setItem('fal_manual_key', key);
-
-                fal.config({ credentials: key, proxyUrl: null });
-
                 const btn = document.getElementById('testKeyBtn');
                 btn.innerText = "Testing...";
-                btn.disabled = true;
                 try {
-                    console.log("[Test] Running connection test...");
-                    const result = await fal.run("fal-ai/nano-banana-2", {
-                        input: { prompt: "test" }
-                    });
-                    console.log("[Test] Success:", result);
-                    alert("SUCCESS! Connection established with fal.ai.");
-                } catch (e) {
-                    console.error("[Test] Failed:", e);
-                    alert(`FAILED: ${e.status} ${e.message}`);
-                } finally {
-                    btn.innerText = "Test Connection";
-                    btn.disabled = false;
-                }
+                    fal.config({ credentials: key, proxyUrl: null });
+                    await fal.run("fal-ai/nano-banana-2", { input: { prompt: "test" } });
+                    alert("SUCCESS!");
+                } catch (e) { alert("FAILED: " + e.message); }
+                finally { btn.innerText = "Test Connection"; }
             };
 
-            window.addEventListener('resize', () => {
-                camera.aspect = container.clientWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(container.clientWidth, window.innerHeight);
+            // Setup File Inputs
+            const setupId = (areaId, inputId, previewId, labelId, callback) => {
+                const area = document.getElementById(areaId);
+                const input = document.getElementById(inputId);
+                area.onclick = () => input.click();
+                input.onchange = (e) => {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        callback(ev.target.result);
+                        document.getElementById(previewId).src = ev.target.result;
+                        document.getElementById(labelId).style.visibility = 'hidden';
+                    };
+                    reader.readAsDataURL(e.target.files[0]);
+                };
+            };
+            setupId('photoDropArea', 'photoInput', 'photoPreview', 'photoLabel', v => basePhotoB64 = v);
+            setupId('uvDropArea', 'uvInput', 'uvPatternPreview', 'uvLabel', v => uvPatternB64 = v);
+
+            [1, 2, 3].forEach(id => {
+                document.getElementById(`toggle${id}`).onchange = (e) => {
+                    textureState[id].isManual = e.target.checked;
+                    updatePreview(id);
+                };
+                document.getElementById(`manualIn${id}`).onchange = (e) => {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        textureState[id].manual = ev.target.result;
+                        textureState[id].isManual = true;
+                        updatePreview(id);
+                    };
+                    reader.readAsDataURL(e.target.files[0]);
+                };
             });
+
+            // Camera handling
+            let stream = null;
+            document.getElementById('startCamBtn').onclick = async (e) => {
+                e.stopPropagation();
+                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                document.getElementById('cameraVideo').srcObject = stream;
+                document.getElementById('cameraContainer').style.display = 'block';
+            };
+            document.getElementById('hideCamBtn').onclick = () => {
+                stream.getTracks().forEach(t => t.stop());
+                document.getElementById('cameraContainer').style.display = 'none';
+            };
+            document.getElementById('snapBtn').onclick = () => {
+                const v = document.getElementById('cameraVideo');
+                const canvas = document.createElement('canvas');
+                canvas.width = v.videoWidth; canvas.height = v.videoHeight;
+                canvas.getContext('2d').drawImage(v, 0, 0);
+                basePhotoB64 = canvas.toDataURL('image/png');
+                document.getElementById('photoPreview').src = basePhotoB64;
+                document.getElementById('photoLabel').style.visibility = 'hidden';
+                document.getElementById('hideCamBtn').click();
+            };
+
+            const saved = localStorage.getItem('fal_manual_key');
+            if (saved) document.getElementById('falKeyInput').value = saved;
         }
 
         function animate() {
@@ -1160,7 +801,8 @@ b)以下のテイストで表示します
             if (mixer) mixer.update(clock.getDelta());
             renderer.render(scene, camera);
         }
+
+        init(); animate();
     </script>
 </body>
-
 </html>
