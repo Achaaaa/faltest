@@ -525,7 +525,8 @@
             style="border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 20px;">
             <label>API Key (Optional Fallback)</label>
             <input type="text" id="falKeyInput" placeholder="Enter FAL_KEY if environment variable fails">
-            <button type="button" id="testKeyBtn" style="margin-top: 10px; background: #334155; padding: 8px; font-size: 11px;">Test Connection</button>
+            <button type="button" id="testKeyBtn"
+                style="margin-top: 10px; background: #334155; padding: 8px; font-size: 11px;">Test Connection</button>
             <p style="font-size: 9px; color: var(--text-sub); margin-top: 6px;">
                 ※直接入力すると、サーバーの制限を回避して高速に動作します。
             </p>
@@ -875,12 +876,16 @@ b)以下のテイストで表示します
 
         // --- fal.ai Proxy Fetcher ---
         async function falFetch(isEdit, payload) {
+            console.log(`[Debug] falFetch called at: ${new Date().toLocaleTimeString()}`);
             try {
                 // If a manual key is provided, use the fal core SDK directly (more secure & avoids proxy limits)
                 let manualKey = document.getElementById('falKeyInput').value.trim();
                 if (manualKey) {
                     // Automatic Cleaning: remove prefixes like "FAL_KEY=" or quotes if pasted by mistake
                     manualKey = manualKey.replace(/^FAL_KEY\s*=\s*/i, "").replace(/^['"]|['"]$/g, "").trim();
+
+                    console.log("[Client] Configuring global fal credentials.");
+                    fal.config({ credentials: manualKey, proxyUrl: null });
 
                     console.log("[Client] Using direct fal.ai connection.");
                     console.log(`[Debug] Cleaned key length: ${manualKey.length}`);
@@ -892,18 +897,30 @@ b)以下のテイストで表示します
 
                     const endpoint = isEdit ? "fal-ai/nano-banana-2/edit" : "fal-ai/nano-banana-2";
                     const result = await fal.run(endpoint, {
-                        input: payload,
-                        credentials: manualKey
+                        input: payload
                     });
                     
-                    console.log(`[Client] Success from ${endpoint}:`, result);
+                    // Added 2s sleep to ensure CDN propagation
+                    await sleep(2000);
                     
-                    if (!result.images || result.images.length === 0) {
-                        console.error("[Client] No images in result object:", result);
-                        throw new Error("No images generated.");
+                    console.log(`[Client] Success from ${endpoint}. Full Result:`, JSON.stringify(result, null, 2));
+                    
+                    // Try different result patterns (images array, single image object, or direct url)
+                    let url = null;
+                    if (result.images && result.images.length > 0) {
+                        url = result.images[0].url;
+                    } else if (result.image && result.image.url) {
+                        url = result.image.url;
+                    } else if (result.url) {
+                        url = result.url;
                     }
-                    const url = result.images[0].url;
-                    console.log(`[Client] Generated URL: ${url}`);
+
+                    if (!url) {
+                        console.error("[Client] Could not find image URL in result:", result);
+                        throw new Error("No image URL found in the API response.");
+                    }
+                    
+                    console.log(`[Client] Extracted URL: ${url}`);
                     return url;
                 }
 
@@ -1101,23 +1118,24 @@ b)以下のテイストで表示します
             new OrbitControls(camera, renderer.domElement).target.set(0, 100, 0);
             document.getElementById('genBtn').onclick = run;
             document.getElementById('applyCurrentBtn').onclick = applyToModel;
-            
+
             document.getElementById('testKeyBtn').onclick = async () => {
                 const key = document.getElementById('falKeyInput').value.trim().replace(/^FAL_KEY\s*=\s*/i, "").replace(/^['"]|['"]$/g, "").trim();
                 if (!key) return alert("Please enter a key first!");
                 if (!key.includes(":")) return alert("Invalid format. Key should contain a colon (ID:SECRET).");
-                
+
                 // Save it for later
                 localStorage.setItem('fal_manual_key', key);
-                
+
+                fal.config({ credentials: key, proxyUrl: null });
+
                 const btn = document.getElementById('testKeyBtn');
                 btn.innerText = "Testing...";
                 btn.disabled = true;
                 try {
                     console.log("[Test] Running connection test...");
                     const result = await fal.run("fal-ai/nano-banana-2", {
-                        input: { prompt: "test" },
-                        credentials: key
+                        input: { prompt: "test" }
                     });
                     console.log("[Test] Success:", result);
                     alert("SUCCESS! Connection established with fal.ai.");

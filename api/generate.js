@@ -22,7 +22,8 @@ export default async function handler(req, res) {
 
   // Allow GET for easy browser-based diagnostics
   if (req.method === 'GET') {
-    const envKeys = Object.keys(process.env).filter(k => !k.startsWith('VERCEL_')).sort();
+    const envKeys = Object.keys(process.env).sort();
+    const vercelProjectName = process.env.VERCEL_GIT_REPO_SLUG || 'unknown';
     return res.status(200)
       .setHeader('Cache-Control', 'no-store, max-age=0')
       .json({
@@ -30,11 +31,10 @@ export default async function handler(req, res) {
         now: new Date().toISOString(),
         fal_key_present: !!process.env.FAL_KEY,
         fal_key_length: process.env.FAL_KEY ? process.env.FAL_KEY.length : 0,
-        env_keys_found: envKeys,
         vercel_env: process.env.VERCEL_ENV || 'unknown',
-        vercel_region: process.env.VERCEL_REGION || 'unknown',
+        vercel_project: vercelProjectName,
         vercel_url: process.env.VERCEL_URL || 'unknown',
-        node_env: process.env.NODE_ENV,
+        env_keys_found: envKeys,
         message: 'This is a diagnostic response. For generation, please use POST.'
       });
   }
@@ -57,6 +57,8 @@ export default async function handler(req, res) {
     console.error("[API] FAL_KEY is missing.");
     console.error("[API] Available Env Keys:", envKeys.join(', '));
     console.error("[API] Current VERCEL_ENV:", process.env.VERCEL_ENV);
+    console.error("[API] Current Node Environment:", process.env.NODE_ENV);
+    console.error("[API] Current Working Directory:", process.cwd());
 
     return res.status(500).json({
       error: 'FAL_KEY environment variable is not set in the server environment.',
