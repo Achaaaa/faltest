@@ -866,11 +866,15 @@ b)以下のテイストで表示します
                 // If a manual key is provided, use the fal core SDK directly (more secure & avoids proxy limits)
                 const manualKey = document.getElementById('falKeyInput').value.trim();
                 if (manualKey) {
-                    console.log("[Client] Using direct fal.ai connection with manual key.");
-                    fal.config({ credentials: manualKey, proxyUrl: null });
+                    console.log("[Client] Using direct fal.ai connection.");
+                    console.log(`[Debug] Key length: ${manualKey.length}`);
+                    console.log(`[Debug] Key starts with: ${manualKey.substring(0, 5)}...`);
+                    console.log(`[Debug] Key ends with: ...${manualKey.substring(manualKey.length - 3)}`);
+                    
                     const endpoint = isEdit ? "fal-ai/nano-banana-2/edit" : "fal-ai/nano-banana-2";
                     const result = await fal.run(endpoint, {
-                        input: payload
+                        input: payload,
+                        credentials: manualKey
                     });
                     if (!result.images || result.images.length === 0) throw new Error("No images generated.");
                     return result.images[0].url;
