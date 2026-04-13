@@ -908,6 +908,17 @@ b)以下のテイストで表示します
                 return data.images[0].url;
             } catch (err) {
                 console.error("falFetch failed:", err);
+                
+                // Detailed error messaging for direct SDK calls
+                if (err.status === 401) {
+                    throw new Error("Invalid API Key. Please check the FAL_KEY you entered in the input field.");
+                }
+                if (err.status === 402) {
+                    throw new Error("Insufficient balance in your fal.ai account.");
+                }
+                if (err.data && err.data.detail) {
+                    throw new Error(`fal.ai Error: ${err.data.detail}`);
+                }
                 throw err;
             }
         }
