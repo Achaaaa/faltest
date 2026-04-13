@@ -450,10 +450,12 @@
             <div class="status-item" id="st-4"><span class="status-icon">⚪</span> Stage 4: 3D Mapping</div>
         </div>
 
-        <div class="input-group" style="background: rgba(29, 185, 84, 0.1); padding: 15px; border-radius: 8px; border: 1px solid var(--accent); margin-bottom: 24px;">
+        <div class="input-group"
+            style="background: rgba(29, 185, 84, 0.1); padding: 15px; border-radius: 8px; border: 1px solid var(--accent); margin-bottom: 24px;">
             <label style="color: var(--accent);">FAL_KEY (Required)</label>
             <input type="text" id="falKeyInput" placeholder="xxxx-xxxx-xxxx:yyyy-yyyy">
-            <button type="button" id="testKeyBtn" style="margin-top: 10px; height: 36px; padding: 0; font-size: 11px;">Test Connection</button>
+            <button type="button" id="testKeyBtn"
+                style="margin-top: 10px; height: 36px; padding: 0; font-size: 11px;">Test Connection</button>
         </div>
 
         <div class="input-group">
@@ -468,8 +470,8 @@
 
         <div class="input-group">
             <label>Detailed Prompt</label>
-            <textarea id="p2" rows="4">１枚目の人物を２枚目のスタイルに変換、デフォルメして。
-髪型、顔だち、服装の特徴を忠実に引き継ぎ、ちびキャラ（Chibi）スタイルでアメリカン・コミックス風に仕上げて。</textarea>
+            <textarea id="p2"
+                rows="4">１枚目の人物を２枚目のスタイルに変換、デフォルメして。 目的と目標: * ユーザーから提供された写真の人物を、3Dフィギュアのようなテイストにした後、それをアメコミのスタイルに変換した全身画像を生成します。 * ユーザー写真の髪型、顔だち、着ているもの、アクセサリーなどの身体的特徴を忠実に引き継ぎます。 行動とルール: 1) 入力内容の分析: ユーザーがアップロードした人物写真から、顔の特徴、服装を詳細に把握します。 2) 画像生成のプロセス: a) 写真の人物の顔と体をデフォルメします。 -大きくデフォルメされた瞳。左目の瞳の中に白抜きで 'J' の文字、右目の瞳の中に 'B' の文字がはっきりと描かれている。無表情でクールな顔立ち。 -口は小さく、首が細く、肩幅は極端に狭く。足はかなり大きくデフォルメする。 -極端にデフォルメされた5等身（大きな頭、小さな体、非常に大きな足）。ちびキャラ（Chibi）スタイル。 b)以下のテイストで表示します -レトロでヴィンテージなアメリカン・コミックスの印刷スタイル。画像は古くて不完全なオフセット印刷機で印刷されたように見え、すべての色や影の部分は、目に見える網点（ベンデイドット）パターンによって構成されている。 -人物のポーズは、躍動感のあるダンシングスタイルで広角レンズを意識させるダイナミックな構図で描きます。 -背景はキャラクターを引き立てるビビッドな単色（黄色、赤、青、ピンク、水色、緑など）に設定 -余計なオブジェクトを排除。 -コマ割りはせず、単色背景にキャラクターのみ配置された状態にします。 全体のトーン: * エネルギッシュで、コミカル。 * ユーザーの写真をヒーローのように変身させるワクワク感を演出し、クリエイティブな提案を積極的に行います。</textarea>
         </div>
 
         <div class="input-group">
@@ -482,16 +484,20 @@
         </div>
 
         <button id="genBtn">START PIPELINE</button>
-        <button id="applyCurrentBtn" style="background:#1e293b; color: white; margin-top: -10px; font-size: 11px;">APPLY CURRENT (SKIP AI)</button>
+        <button id="applyCurrentBtn" style="background:#1e293b; color: white; margin-top: -10px; font-size: 11px;">APPLY
+            CURRENT (SKIP AI)</button>
 
         <div class="preview-grid">
             <div class="preview-box">
                 <div class="preview-controls" id="controls1">
-                    <div class="settings-toggle" onclick="toggleSettings(1)">⚙️<div class="mode-dot" id="modeDot1"></div></div>
+                    <div class="settings-toggle" onclick="toggleSettings(1)">⚙️<div class="mode-dot" id="modeDot1">
+                        </div>
+                    </div>
                     <div class="controls-content">
                         <div class="mode-text" id="modeText1">AUTO</div>
                         <label class="switch"><input type="checkbox" id="toggle1"><span class="slider"></span></label>
-                        <button class="manual-btn" onclick="document.getElementById('manualIn1').click()">Manual</button>
+                        <button class="manual-btn"
+                            onclick="document.getElementById('manualIn1').click()">Manual</button>
                     </div>
                 </div>
                 <img id="img1"><input type="file" id="manualIn1" accept="image/*" style="display:none;">
@@ -500,11 +506,14 @@
 
             <div class="preview-box">
                 <div class="preview-controls" id="controls2">
-                    <div class="settings-toggle" onclick="toggleSettings(2)">⚙️<div class="mode-dot" id="modeDot2"></div></div>
+                    <div class="settings-toggle" onclick="toggleSettings(2)">⚙️<div class="mode-dot" id="modeDot2">
+                        </div>
+                    </div>
                     <div class="controls-content">
                         <div class="mode-text" id="modeText2">AUTO</div>
                         <label class="switch"><input type="checkbox" id="toggle2"><span class="slider"></span></label>
-                        <button class="manual-btn" onclick="document.getElementById('manualIn2').click()">Manual</button>
+                        <button class="manual-btn"
+                            onclick="document.getElementById('manualIn2').click()">Manual</button>
                     </div>
                 </div>
                 <img id="img2"><input type="file" id="manualIn2" accept="image/*" style="display:none;">
@@ -513,18 +522,23 @@
 
             <div class="preview-box">
                 <div class="preview-controls" id="controls3">
-                    <div class="settings-toggle" onclick="toggleSettings(3)">⚙️<div class="mode-dot" id="modeDot3"></div></div>
+                    <div class="settings-toggle" onclick="toggleSettings(3)">⚙️<div class="mode-dot" id="modeDot3">
+                        </div>
+                    </div>
                     <div class="controls-content">
                         <div class="mode-text" id="modeText3">AUTO</div>
                         <label class="switch"><input type="checkbox" id="toggle3"><span class="slider"></span></label>
-                        <button class="manual-btn" onclick="document.getElementById('manualIn3').click()">Manual</button>
+                        <button class="manual-btn"
+                            onclick="document.getElementById('manualIn3').click()">Manual</button>
                     </div>
                 </div>
                 <img id="img3"><input type="file" id="manualIn3" accept="image/*" style="display:none;">
                 <div class="p-label">3. Mask</div>
             </div>
 
-            <div class="preview-box"><img id="img4"><div class="p-label">4. Result</div></div>
+            <div class="preview-box"><img id="img4">
+                <div class="p-label">4. Result</div>
+            </div>
         </div>
     </div>
 
@@ -573,19 +587,39 @@
 
             const endpoint = isEdit ? "fal-ai/nano-banana-2/edit" : "fal-ai/nano-banana-2";
             console.log(`[falFetch] Calling ${endpoint}...`);
-            
+
             const result = await fal.run(endpoint, { input: payload });
-            
+            window.lastResult = result; // Expose for manual inspection
+
             // Wait for CDN propagation
             await sleep(2000);
             console.log(`[falFetch] Result received:`, JSON.stringify(result, null, 2));
 
-            let url = null;
-            if (result.images && result.images.length > 0) url = result.images[0].url;
-            else if (result.image && result.image.url) url = result.image.url;
-            else if (result.url) url = result.url;
+            // Fuzzy URL detection: search recursively for any valid-looking image URL string
+            const findUrl = (obj) => {
+                if (!obj) return null;
+                if (typeof obj === 'string') {
+                    if (obj.startsWith('http') && (obj.includes('.png') || obj.includes('.jpg') || obj.includes('.webp') || obj.includes('fal.run'))) {
+                        return obj;
+                    }
+                }
+                if (typeof obj === 'object') {
+                    for (const key in obj) {
+                        const found = findUrl(obj[key]);
+                        if (found) return found;
+                    }
+                }
+                return null;
+            };
 
-            if (!url) throw new Error("Could not find image URL in the response.");
+            const url = findUrl(result);
+
+            if (!url) {
+                console.error("[falFetch] Data structure unknown or missing URL:", result);
+                throw new Error(`Cloud image URL not found. Available keys: ${Object.keys(result).join(', ')}. Check console (window.lastResult) for details.`);
+            }
+
+            console.log(`[falFetch] Success! Extracted URL: ${url}`);
             return url;
         }
 
@@ -596,7 +630,7 @@
 
             const btn = document.getElementById('genBtn');
             btn.disabled = true;
-            for(let i=1; i<=4; i++) updateStatus(i, 'idle');
+            for (let i = 1; i <= 4; i++) updateStatus(i, 'idle');
 
             try {
                 // Stage 1: Style
@@ -613,7 +647,7 @@
                 // Stage 2: T-Pose Pattern Matching
                 updateStatus(2, 'loading');
                 const res2 = await falFetch(true, {
-                    prompt: "Convert to T-pose pattern guide using the guide from Image 2",
+                    prompt: "Convert to T-pose using the guide from Image 2",
                     image_urls: [res1, uvPatternB64]
                 });
                 textureState[2].auto = res2;
@@ -794,6 +828,25 @@
 
             const saved = localStorage.getItem('fal_manual_key');
             if (saved) document.getElementById('falKeyInput').value = saved;
+
+            // --- Load Default Pattern ---
+            async function loadDefaultPattern() {
+                try {
+                    const response = await fetch('PatternGuide.png');
+                    if (!response.ok) throw new Error('Default pattern not found');
+                    const blob = await response.blob();
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        uvPatternB64 = e.target.result;
+                        document.getElementById('uvPatternPreview').src = uvPatternB64;
+                        document.getElementById('uvLabel').style.visibility = 'hidden';
+                    };
+                    reader.readAsDataURL(blob);
+                } catch (err) {
+                    console.warn("Default pattern guide not loaded. Manual upload may be needed.", err);
+                }
+            }
+            loadDefaultPattern();
         }
 
         function animate() {
@@ -805,4 +858,5 @@
         init(); animate();
     </script>
 </body>
+
 </html>
