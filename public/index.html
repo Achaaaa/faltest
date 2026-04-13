@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>PeraModelGeneratorrrrr</title>
+    <title>PeraModelGenerator</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -521,11 +521,13 @@
             <div class="status-item" id="st-4"><span class="status-icon">⚪</span> Stage 4: 3D Mapping</div>
         </div>
 
-        <div class="input-group" style="border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 20px;">
+        <div class="input-group"
+            style="border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 20px;">
             <label>API Key (Optional Fallback)</label>
-            <input type="password" id="falKeyInput" placeholder="Enter FAL_KEY if environment variable fails">
+            <input type="text" id="falKeyInput" placeholder="Enter FAL_KEY if environment variable fails">
+            <button type="button" id="testKeyBtn" style="margin-top: 10px; background: #334155; padding: 8px; font-size: 11px;">Test Connection</button>
             <p style="font-size: 9px; color: var(--text-sub); margin-top: 6px;">
-                ※直接入力すると、サーバーの制限を回避して高速に動作します。入力しない場合は、Vercelの環境変数を使用します。
+                ※直接入力すると、サーバーの制限を回避して高速に動作します。
             </p>
         </div>
 
@@ -714,6 +716,17 @@ b)以下のテイストで表示します
             3: { auto: null, manual: null, isManual: false }
         };
 
+        // Persistent Key Support
+        window.addEventListener('load', () => {
+            const savedKey = localStorage.getItem('fal_manual_key');
+            if (savedKey) {
+                document.getElementById('falKeyInput').value = savedKey;
+            }
+        });
+
+        // Sleep helper for stability
+        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 
         // Helper to update the visible image and labels in a preview box
         function updatePreview(id) {
@@ -797,7 +810,7 @@ b)以下のテイストで表示します
         setupFile('photoDropArea', 'photoInput', 'photoPreview', 'photoLabel', (v) => basePhotoB64 = v);
         setupFile('uvDropArea', 'uvInput', 'uvPatternPreview', 'uvLabel', (v) => uvPatternB64 = v);
 
-        // --- Load Default Pattern Guide ---
+        // --- Load Default Pattern ---
         async function loadDefaultPattern() {
             try {
                 const response = await fetch('PatternGuide.png');
@@ -864,20 +877,34 @@ b)以下のテイストで表示します
         async function falFetch(isEdit, payload) {
             try {
                 // If a manual key is provided, use the fal core SDK directly (more secure & avoids proxy limits)
-                const manualKey = document.getElementById('falKeyInput').value.trim();
+                let manualKey = document.getElementById('falKeyInput').value.trim();
                 if (manualKey) {
+                    // Automatic Cleaning: remove prefixes like "FAL_KEY=" or quotes if pasted by mistake
+                    manualKey = manualKey.replace(/^FAL_KEY\s*=\s*/i, "").replace(/^['"]|['"]$/g, "").trim();
+
                     console.log("[Client] Using direct fal.ai connection.");
-                    console.log(`[Debug] Key length: ${manualKey.length}`);
-                    console.log(`[Debug] Key starts with: ${manualKey.substring(0, 5)}...`);
-                    console.log(`[Debug] Key ends with: ...${manualKey.substring(manualKey.length - 3)}`);
-                    
+                    console.log(`[Debug] Cleaned key length: ${manualKey.length}`);
+                    console.log(`[Debug] Cleaned key starts with: ${manualKey.substring(0, 5)}...`);
+
+                    if (!manualKey.includes(":")) {
+                        throw new Error("Invalid API Key format. It should look like 'ID:SECRET' (contains a colon).");
+                    }
+
                     const endpoint = isEdit ? "fal-ai/nano-banana-2/edit" : "fal-ai/nano-banana-2";
                     const result = await fal.run(endpoint, {
                         input: payload,
                         credentials: manualKey
                     });
-                    if (!result.images || result.images.length === 0) throw new Error("No images generated.");
-                    return result.images[0].url;
+                    
+                    console.log(`[Client] Success from ${endpoint}:`, result);
+                    
+                    if (!result.images || result.images.length === 0) {
+                        console.error("[Client] No images in result object:", result);
+                        throw new Error("No images generated.");
+                    }
+                    const url = result.images[0].url;
+                    console.log(`[Client] Generated URL: ${url}`);
+                    return url;
                 }
 
                 // Fallback to Serverless Proxy
@@ -912,7 +939,7 @@ b)以下のテイストで表示します
                 return data.images[0].url;
             } catch (err) {
                 console.error("falFetch failed:", err);
-                
+
                 // Detailed error messaging for direct SDK calls
                 if (err.status === 401) {
                     throw new Error("Invalid API Key. Please check the FAL_KEY you entered in the input field.");
@@ -938,10 +965,12 @@ b)以下のテイストで表示します
                 let res1 = (textureState[1].isManual && textureState[1].manual) ? textureState[1].manual : null;
                 if (!res1) {
                     updateStatus(1, 'loading');
+                    console.log("[Pipeline] Starting Stage 1: Style...");
                     res1 = await falFetch(true, {
                         prompt: document.getElementById('p2').value,
                         image_urls: [basePhotoB64]
                     });
+                    console.log("[Pipeline] Stage 1 Results:", res1);
                     textureState[1].auto = res1;
                     updatePreview(1);
                     updateStatus(1, 'done');
@@ -949,14 +978,18 @@ b)以下のテイストで表示します
                     updateStatus(1, 'done');
                 }
 
+                await sleep(1000); // Wait for fal.ai to stabilize CDN
+
                 // Stage 2: Dual-Guide T-Pose Pattern Matching
                 let res2 = (textureState[2].isManual && textureState[2].manual) ? textureState[2].manual : null;
                 if (!res2) {
                     updateStatus(2, 'loading');
+                    console.log("[Pipeline] Starting Stage 2: Pattern Matching...");
                     res2 = await falFetch(true, {
                         prompt: document.getElementById('p3').value,
                         image_urls: [res1, uvPatternB64],
                     });
+                    console.log("[Pipeline] Stage 2 Results:", res2);
                     textureState[2].auto = res2;
                     updatePreview(2);
                     updateStatus(2, 'done');
@@ -964,14 +997,18 @@ b)以下のテイストで表示します
                     updateStatus(2, 'done');
                 }
 
+                await sleep(1000);
+
                 // Stage 3: Generate Alpha Mask
                 let res3 = (textureState[3].isManual && textureState[3].manual) ? textureState[3].manual : null;
                 if (!res3) {
                     updateStatus(3, 'loading');
+                    console.log("[Pipeline] Starting Stage 3: Alpha Mask...");
                     res3 = await falFetch(true, {
                         prompt: "Professional 2D game mask texture, high contrast black and white, white silhouette of the character from Image 1, pure black background, no gray areas, sharp edges",
                         image_urls: [res2]
                     });
+                    console.log("[Pipeline] Stage 3 Results:", res3);
                     textureState[3].auto = res3;
                     updatePreview(3);
                     updateStatus(3, 'done');
@@ -1064,6 +1101,35 @@ b)以下のテイストで表示します
             new OrbitControls(camera, renderer.domElement).target.set(0, 100, 0);
             document.getElementById('genBtn').onclick = run;
             document.getElementById('applyCurrentBtn').onclick = applyToModel;
+            
+            document.getElementById('testKeyBtn').onclick = async () => {
+                const key = document.getElementById('falKeyInput').value.trim().replace(/^FAL_KEY\s*=\s*/i, "").replace(/^['"]|['"]$/g, "").trim();
+                if (!key) return alert("Please enter a key first!");
+                if (!key.includes(":")) return alert("Invalid format. Key should contain a colon (ID:SECRET).");
+                
+                // Save it for later
+                localStorage.setItem('fal_manual_key', key);
+                
+                const btn = document.getElementById('testKeyBtn');
+                btn.innerText = "Testing...";
+                btn.disabled = true;
+                try {
+                    console.log("[Test] Running connection test...");
+                    const result = await fal.run("fal-ai/nano-banana-2", {
+                        input: { prompt: "test" },
+                        credentials: key
+                    });
+                    console.log("[Test] Success:", result);
+                    alert("SUCCESS! Connection established with fal.ai.");
+                } catch (e) {
+                    console.error("[Test] Failed:", e);
+                    alert(`FAILED: ${e.status} ${e.message}`);
+                } finally {
+                    btn.innerText = "Test Connection";
+                    btn.disabled = false;
+                }
+            };
+
             window.addEventListener('resize', () => {
                 camera.aspect = container.clientWidth / window.innerHeight;
                 camera.updateProjectionMatrix();

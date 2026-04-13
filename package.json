@@ -9,6 +9,7 @@
     "deploy": "vercel deploy --prod"
   },
   "dependencies": {
-    "@fal-ai/client": "^1.2.0"
+    "@fal-ai/client": "^1.2.0",
+    "@fal-ai/server-proxy": "^0.1.0"
   }
 }

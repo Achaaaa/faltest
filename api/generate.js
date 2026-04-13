@@ -31,6 +31,9 @@ export default async function handler(req, res) {
         fal_key_present: !!process.env.FAL_KEY,
         fal_key_length: process.env.FAL_KEY ? process.env.FAL_KEY.length : 0,
         env_keys_found: envKeys,
+        vercel_env: process.env.VERCEL_ENV || 'unknown',
+        vercel_region: process.env.VERCEL_REGION || 'unknown',
+        vercel_url: process.env.VERCEL_URL || 'unknown',
         node_env: process.env.NODE_ENV,
         message: 'This is a diagnostic response. For generation, please use POST.'
       });
@@ -50,17 +53,18 @@ export default async function handler(req, res) {
 
   // The SDK automatically uses the FAL_KEY environment variable
   if (!process.env.FAL_KEY) {
-    const envKeys = Object.keys(process.env).filter(k => !k.startsWith('VERCEL_')).sort();
+    const envKeys = Object.keys(process.env).sort();
     console.error("[API] FAL_KEY is missing.");
-    console.error("[API] Available Env Keys (excluding VERCEL_*):", envKeys.join(', '));
-    console.error("[API] Current NODE_ENV:", process.env.NODE_ENV);
+    console.error("[API] Available Env Keys:", envKeys.join(', '));
+    console.error("[API] Current VERCEL_ENV:", process.env.VERCEL_ENV);
 
     return res.status(500).json({
       error: 'FAL_KEY environment variable is not set in the server environment.',
       debug_info: {
         env_keys_found: envKeys,
+        vercel_env: process.env.VERCEL_ENV,
         node_env: process.env.NODE_ENV,
-        hint: 'Please check your Vercel Dashboard -> Settings -> Environment Variables and ensure FAL_KEY is added to all environments (Production, Preview, Development).'
+        hint: 'Please check your Vercel Dashboard -> Settings -> Environment Variables. Ensure FAL_KEY is added to all environments.'
       }
     });
   }
