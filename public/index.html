@@ -458,6 +458,17 @@
                 style="margin-top: 10px; height: 36px; padding: 0; font-size: 11px;">Test Connection</button>
         </div>
 
+        <div class="input-group"
+            style="margin-bottom: 24px; padding: 15px; background: var(--bg-hover); border-radius: 8px; border: 1px solid var(--border);">
+            <label>Save Destination</label>
+            <button type="button" id="setSaveDirBtn"
+                style="background:var(--bg-card); color:#fff; border:1px solid #535353; height:36px; padding:0; font-size:11px; margin-top:8px;">📁
+                CHOOSE FOLDER</button>
+            <div id="saveDirName"
+                style="font-size:11px; color:var(--text-sub); margin-top:8px; text-align:center; word-break: break-all;">
+                No folder selected</div>
+        </div>
+
         <div class="input-group">
             <label>1. Person Photo</label>
             <div class="file-input-area" id="photoDropArea">
@@ -471,7 +482,7 @@
         <div class="input-group">
             <label>Detailed Prompt</label>
             <textarea id="p2"
-                rows="4">１枚目の人物を２枚目のスタイルに変換、デフォルメして。 目的と目標: * ユーザーから提供された写真の人物を、3Dフィギュアのようなテイストにした後、それをアメコミのスタイルに変換した全身画像を生成します。 * ユーザー写真の髪型、顔だち、着ているもの、アクセサリーなどの身体的特徴を忠実に引き継ぎます。 行動とルール: 1) 入力内容の分析: ユーザーがアップロードした人物写真から、顔の特徴、服装を詳細に把握します。 2) 画像生成のプロセス: a) 写真の人物の顔と体をデフォルメします。 -大きくデフォルメされた瞳。左目の瞳の中に白抜きで 'J' の文字、右目の瞳の中に 'B' の文字がはっきりと描かれている。無表情でクールな顔立ち。 -口は小さく、首が細く、肩幅は極端に狭く。足はかなり大きくデフォルメする。 -極端にデフォルメされた5等身（大きな頭、小さな体、非常に大きな足）。ちびキャラ（Chibi）スタイル。 b)以下のテイストで表示します -レトロでヴィンテージなアメリカン・コミックスの印刷スタイル。画像は古くて不完全なオフセット印刷機で印刷されたように見え、すべての色や影の部分は、目に見える網点（ベンデイドット）パターンによって構成されている。 -人物のポーズは、躍動感のあるダンシングスタイルで広角レンズを意識させるダイナミックな構図で描きます。 -背景はキャラクターを引き立てるビビッドな単色（黄色、赤、青、ピンク、水色、緑など）に設定 -余計なオブジェクトを排除。 -コマ割りはせず、単色背景にキャラクターのみ配置された状態にします。 全体のトーン: * エネルギッシュで、コミカル。 * ユーザーの写真をヒーローのように変身させるワクワク感を演出し、クリエイティブな提案を積極的に行います。</textarea>
+                rows="4">目的と目標: * ユーザーから提供された写真の人物を、3Dフィギュアのようなテイストにした後、それをアメコミのスタイルに変換した全身画像を生成します。1:1比率の画像の中に、収めます。 * ユーザー写真の髪型、顔だち、着ているもの、アクセサリーなどの身体的特徴を忠実に引き継ぎます。 ただし、手に持っているものは無くしてください。行動とルール: 1) 入力内容の分析: ユーザーがアップロードした人物写真から、顔の特徴、服装を詳細に把握します。 2) 画像生成のプロセス: a) -デフォルメされた瞳。左目の瞳の中に白抜きで 'J' の文字、右目の瞳の中に 'B' の文字がはっきりと描かれている。無表情な顔立ち。  b)以下のテイストで表示します -レトロでヴィンテージなアメリカン・コミックスの印刷スタイル。画像は古くて不完全なオフセット印刷機で印刷されたように見え、すべての色や影の部分は、目に見える網点（ベンデイドット）パターンによって構成されている。ダイナミックなポージング。 -背景はキャラクターを引き立てるビビッドな単色（黄色、赤、青、ピンク、水色、緑など）に設定 -余計なオブジェクトを排除。 -コマ割りはせず、単色背景にキャラクターのみ配置された状態にします。 全体のトーン: * エネルギッシュで、コミカル。 * ユーザーの写真をヒーローのように変身させるワクワク感を演出し、クリエイティブな提案を積極的に行います。</textarea>
         </div>
 
         <div class="input-group">
@@ -484,7 +495,8 @@
         </div>
 
         <button id="genBtn">START PIPELINE</button>
-        <button id="applyCurrentBtn" style="background:#1e293b; color: white; margin-top: -10px; font-size: 11px;">APPLY
+        <button id="applyCurrentBtn"
+            style="background:#1e293b; color: white; margin-top: -10px; margin-bottom: 24px; font-size: 11px;">APPLY
             CURRENT (SKIP AI)</button>
 
         <div class="preview-grid">
@@ -569,6 +581,7 @@
 
         let scene, camera, renderer, model, mixer, clock;
         let basePhotoB64 = null, uvPatternB64 = null;
+        let saveDirHandle = null; // Global handle for auto-saving
         const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
         const textureState = {
@@ -647,8 +660,8 @@
                 // Stage 2: T-Pose Pattern Matching
                 updateStatus(2, 'loading');
                 const res2 = await falFetch(true, {
-                    prompt: "Convert to T-pose using the guide from Image 2",
-                    image_urls: [res1, uvPatternB64]
+                    prompt: "白黒線画の素体画像に描かれているポーズやプロポーション、シルエット、骨格はそのまま維持しながら、その素体の服装と顔をキャラ画像ものに変換。完成した画像を白黒の素体画像に重ねたら、頭、四肢の位置がぴったり合うようにする。服装、靴、髪型、顔のデザインはキャラ画像のものを使用し、一切変更しない。 aspectratio is 1:1. ",
+                    image_urls: [uvPatternB64, res1]
                 });
                 textureState[2].auto = res2;
                 updatePreview(2);
@@ -667,11 +680,69 @@
 
                 // Stage 4: Apply to Model
                 await applyToModel();
+
+                // Auto-save generated assets
+                if (saveDirHandle) {
+                    await autoSaveAssets();
+                } else {
+                    console.log("No directory chosen; skipping auto-save.");
+                }
+
             } catch (e) {
                 alert("Generation Error: " + e.message);
                 console.error(e);
             } finally {
                 btn.disabled = false;
+            }
+        }
+
+        async function autoSaveAssets() {
+            const colorSrc = textureState[2].isManual ? textureState[2].manual : textureState[2].auto;
+            const maskSrc = textureState[3].isManual ? textureState[3].manual : textureState[3].auto;
+
+            if (!colorSrc || !maskSrc) return;
+
+            try {
+                let maxIdx = -1;
+                for await (const [name, handle] of saveDirHandle.entries()) {
+                    if (handle.kind === 'directory' && /^\d+$/.test(name)) {
+                        const idx = parseInt(name, 10);
+                        if (idx > maxIdx) maxIdx = idx;
+                    }
+                }
+
+                const nextIdx = maxIdx + 1;
+                const folderName = nextIdx.toString().padStart(2, '0');
+                const nextHandle = await saveDirHandle.getDirectoryHandle(folderName, { create: true });
+
+                const downloadAsBlob = async (src) => {
+                    if (src.startsWith('data:')) {
+                        const res = await fetch(src);
+                        return await res.blob();
+                    } else {
+                        const res = await fetch(src, { mode: 'cors' });
+                        return await res.blob();
+                    }
+                };
+
+                const colorBlob = await downloadAsBlob(colorSrc);
+                const maskBlob = await downloadAsBlob(maskSrc);
+
+                const saveFile = async (handle, filename, blob) => {
+                    const fileHandle = await handle.getFileHandle(filename, { create: true });
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(blob);
+                    await writable.close();
+                };
+
+                await saveFile(nextHandle, 'peraman.png', colorBlob);
+                await saveFile(nextHandle, 'mask.png', maskBlob);
+
+                console.log(`Auto Saved successfully in ${saveDirHandle.name} / ${folderName} /`);
+            } catch (e) {
+                if (e.name !== 'AbortError') {
+                    console.error("Auto saving files failed: " + e.message);
+                }
             }
         }
 
@@ -754,6 +825,16 @@
             new OrbitControls(camera, renderer.domElement).target.set(0, 100, 0);
             document.getElementById('genBtn').onclick = run;
             document.getElementById('applyCurrentBtn').onclick = applyToModel;
+
+            document.getElementById('setSaveDirBtn').onclick = async () => {
+                try {
+                    saveDirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+                    document.getElementById('saveDirName').innerText = `Selected: ${saveDirHandle.name}`;
+                    document.getElementById('saveDirName').style.color = '#1DB954'; // Turn green
+                } catch (e) {
+                    if (e.name !== 'AbortError') console.error(e);
+                }
+            };
 
             document.getElementById('testKeyBtn').onclick = async () => {
                 const key = document.getElementById('falKeyInput').value.trim();
